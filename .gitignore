@@ -5,8 +5,3 @@
 !.vscode/launch.json
 !.vscode/extensions.json
 *.exe
-windows
-deploy
-*.cpp
-*.qrc
-rcc_cgo_windows_windows_amd64.go
