@@ -20,6 +20,23 @@ func main() {
 	window.SetMinimumSize2(450, 200)
 	window.SetWindowTitle(appTitle)
 
+		// create a regular widget
+	// give it a QVBoxLayout
+	// and make it the central widget of the window
+	widget := widgets.NewQWidget(nil, 0)
+	widget.SetLayout(widgets.NewQVBoxLayout())
+	window.SetCentralWidget(widget)
+
+	// create a line edit
+	// with a custom placeholder text
+	// and add it to the central widgets layout
+	input := widgets.NewQLineEdit(nil)
+	input.SetPlaceholderText("Input data ...")
+	widget.Layout().AddWidget(input)
+
+	options := widgets.NewQComboBox(nil)
+	widget.Layout().AddWidget(options)
+
 	// make the window visible and start main Qt event loop
 	window.Show()
 	app.Exec()
