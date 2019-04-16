@@ -26,6 +26,7 @@ class EmailAddress():
     def __init__(self):
         self.osint_options = {
             "haveibeenpwnd": self.hibp_lookup,
+            "extract domain": self.domain_extract
         }
 
     def is_valid_email(self, _input: str):
@@ -36,14 +37,17 @@ class EmailAddress():
     def hibp_lookup(self):
         pass
 
+    def domain_extract(self, email):
+        return email.split("@")[1]
+
 class InputValidator():
     def __init__(self):
         self.ip = IPAdress()
         self.email = EmailAddress()
 
-    def run(self, _function, *args):
+    def run(self, _function, **kwargs):
         try:
-            return _function(*args)
+            return _function(**kwargs)
         except Exception as e:
             return e
 
@@ -56,4 +60,6 @@ class InputValidator():
 
     def execute_transform(self, _input: str, transform: str):
         if self.ip.is_ip_address(_input):
-            return self.run(self.ip.osint_options.get(transform), _input)
+            return self.run(self.ip.osint_options.get(transform), ip=_input)
+        elif self.email.is_valid_email(_input):
+            return self.run(self.email.osint_options.get(transform), email=_input)
