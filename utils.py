@@ -41,9 +41,9 @@ class InputValidator():
         self.ip = IPAdress()
         self.email = EmailAddress()
 
-    def run(self, _function, **kwargs):
+    def run(self, _function, *args):
         try:
-            return _function(**kwargs)
+            return _function(*args)
         except Exception as e:
             return e
 
@@ -56,4 +56,4 @@ class InputValidator():
 
     def execute_transform(self, _input: str, transform: str):
         if self.ip.is_ip_address(_input):
-            return self.run(self.ip.osint_options.get(transform), ip=_input)
+            return self.run(self.ip.osint_options.get(transform), _input)
