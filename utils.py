@@ -16,8 +16,8 @@ class IPAdress():
         except sock.error:
             return False
 
-    def reverse_lookup(self):
-        return sock.gethostbyaddr("69.59.196.211")[0]
+    def reverse_lookup(self, ip):
+        return sock.gethostbyaddr(ip)[0]
     
     def ip_to_asn(self):
         pass
@@ -41,9 +41,9 @@ class InputValidator():
         self.ip = IPAdress()
         self.email = EmailAddress()
 
-    def run(self, _function):
+    def run(self, _function, **kwargs):
         try:
-            return _function()
+            return _function(**kwargs)
         except Exception as e:
             return e
 
@@ -56,4 +56,4 @@ class InputValidator():
 
     def execute_transform(self, _input: str, transform: str):
         if self.ip.is_ip_address(_input):
-            return self.run(self.ip.osint_options.get(transform))
+            return self.run(self.ip.osint_options.get(transform), ip=_input)
