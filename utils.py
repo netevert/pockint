@@ -9,7 +9,7 @@ class IPAdress():
             "ipv4 CIDR report": self.reverse_lookup
         }
 
-    def is_ip_address(self, _input):
+    def is_ip_address(self, _input: str):
         try:
             sock.inet_aton(_input)
             return True
@@ -17,7 +17,7 @@ class IPAdress():
             return False
 
     def reverse_lookup(self):
-        pass
+        return sock.gethostbyaddr("69.59.196.211")[0]
     
     def ip_to_asn(self):
         pass
@@ -28,7 +28,7 @@ class EmailAddress():
             "haveibeenpwnd": self.hibp_lookup,
         }
 
-    def is_valid_email(self, _input):
+    def is_valid_email(self, _input: str):
         if re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', _input):
             return True
         return False
@@ -41,9 +41,19 @@ class InputValidator():
         self.ip = IPAdress()
         self.email = EmailAddress()
 
+    def run(self, _function):
+        try:
+            return _function()
+        except Exception as e:
+            return e
+
     def validate(self, _input):
         if self.ip.is_ip_address(_input):
             return [True, "input: ipv4 address", [option for option in self.ip.osint_options.keys()]]
         elif self.email.is_valid_email(_input):
             return [True, "input: email address", [option for option in self.email.osint_options.keys()]]
         return [False, []]
+
+    def execute_transform(self, _input: str, transform: str):
+        if self.ip.is_ip_address(_input):
+            return self.run(self.ip.osint_options.get(transform))

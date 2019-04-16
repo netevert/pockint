@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 import tkinter.ttk as ttk
 from utils import InputValidator
 
@@ -58,6 +59,7 @@ class Gui(tk.Frame):
 
         # gui bindings
         self.entry.bind('<Return>', self.validate_input)
+        self.selector.bind("<<ComboboxSelected>>", self.run_data_mining)
 
     def validate_input(self, event=None):
         _input = self.entry.get()
@@ -73,6 +75,16 @@ class Gui(tk.Frame):
             self.status['text'] = "ready"
             self.selector["values"] = [""]
             self.selector.current(0)
+
+    def run_data_mining(self, event=None):
+        """Performs the select OSINT data mining operation"""
+        _input = self.entry.get()
+        transform = self.selector.get()
+        try:
+            data = self.validator.execute_transform(_input, transform)
+            self.treeview.insert('', 'end', text=_input, values=(transform, data))
+        except Exception as e:
+            messagebox.showerror("Error", "Error message:" + str(e))
 
     @staticmethod
     def quit_program():
