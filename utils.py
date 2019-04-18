@@ -17,7 +17,11 @@ class IPAdress():
             return False
 
     def reverse_lookup(self, ip):
-        return sock.gethostbyaddr(ip)[0]
+        try:
+            return sock.gethostbyaddr(ip)[0]
+        except Exception as e:
+            if "host not found" in str(e):
+                return "host not found, PTR record likely missing"
     
     def ip_to_asn(self):
         pass
