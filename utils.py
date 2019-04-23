@@ -1,11 +1,12 @@
 import socket as sock
 import re
+import dns.resolver
 
 class IPAdress():
     def __init__(self):
         self.osint_options = {
             "reverse lookup": self.reverse_lookup,
-            "ip to asn": self.ip_to_asn,
+            # "ip to asn": self.ip_to_asn,
             # "ipv4 CIDR report": self.reverse_lookup
         }
 
@@ -18,10 +19,10 @@ class IPAdress():
 
     def reverse_lookup(self, ip):
         try:
-            return sock.gethostbyaddr(ip)[0]
+            return [sock.gethostbyaddr(ip)[0]]
         except Exception as e:
             if "host not found" in str(e):
-                return "host not found, PTR record likely missing"
+                return ["host not found, PTR record likely missing"]
     
     def ip_to_asn(self):
         pass
@@ -42,12 +43,15 @@ class EmailAddress():
         pass
 
     def domain_extract(self, email):
-        return email.split("@")[1]
+        return [email.split("@")[1]]
 
 class Domain():
     def __init__(self):
         self.osint_options = {
-            "ip lookup" : self.to_a_record
+            "ip lookup" : self.to_a_record,
+            "mx lookup" : self.to_mx_records,
+            "txt lookup": self.to_txt_records,
+            "ns lookup" : self.to_ns_records
         }
 
     def is_valid_domain(self, _input: str):
@@ -57,7 +61,25 @@ class Domain():
     
     def to_a_record(self, domain):
         try:
-            return sock.gethostbyname(domain)
+            return [sock.gethostbyname(domain)]
+        except Exception as e:
+            raise e
+
+    def to_mx_records(self, domain):
+        try:
+            return [x.exchange for x in dns.resolver.query(domain, 'MX')]
+        except Exception as e:
+            raise e
+
+    def to_txt_records(self, domain):
+        try:
+            return [x.to_text() for x in dns.resolver.query(domain, 'TXT')]
+        except Exception as e:
+            raise e
+
+    def to_ns_records(self, domain):
+        try:
+            return [x.to_text() for x in dns.resolver.query(domain, 'NS')]
         except Exception as e:
             raise e
 
