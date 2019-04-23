@@ -6,7 +6,7 @@ class IPAdress():
         self.osint_options = {
             "reverse lookup": self.reverse_lookup,
             "ip to asn": self.ip_to_asn,
-            "ipv4 CIDR report": self.reverse_lookup
+            # "ipv4 CIDR report": self.reverse_lookup
         }
 
     def is_ip_address(self, _input: str):
@@ -44,10 +44,28 @@ class EmailAddress():
     def domain_extract(self, email):
         return email.split("@")[1]
 
+class Domain():
+    def __init__(self):
+        self.osint_options = {
+            "ip lookup" : self.to_a_record
+        }
+
+    def is_valid_domain(self, _input: str):
+        if re.match('^((?!-))(xn--)?[a-z0-9][a-z0-9-_]{0,61}[a-z0-9]{0,1}\.(xn--)?([a-z0-9\-]{1,61}|[a-z0-9-]{1,30}\.[a-z]{2,})$', _input):
+            return True
+        return False
+    
+    def to_a_record(self, domain):
+        try:
+            return sock.gethostbyname(domain)
+        except Exception as e:
+            raise e
+
 class InputValidator():
     def __init__(self):
         self.ip = IPAdress()
         self.email = EmailAddress()
+        self.domain = Domain()
 
     def run(self, _function, **kwargs):
         try:
@@ -60,6 +78,8 @@ class InputValidator():
             return [True, "input: ipv4 address", [option for option in self.ip.osint_options.keys()]]
         elif self.email.is_valid_email(_input):
             return [True, "input: email address", [option for option in self.email.osint_options.keys()]]
+        elif self.domain.is_valid_domain(_input):
+            return [True, "input: domain", [option for option in self.domain.osint_options.keys()]]
         return [False, []]
 
     def execute_transform(self, _input: str, transform: str):
@@ -67,3 +87,5 @@ class InputValidator():
             return self.run(self.ip.osint_options.get(transform), ip=_input)
         elif self.email.is_valid_email(_input):
             return self.run(self.email.osint_options.get(transform), email=_input)
+        elif self.domain.is_valid_domain(_input):
+            return self.run(self.domain.osint_options.get(transform), domain=_input)

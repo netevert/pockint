@@ -60,8 +60,14 @@ class Gui(tk.Frame):
         # gui bindings
         self.entry.bind('<Return>', self.validate_input)
         self.selector.bind("<<ComboboxSelected>>", self.run_data_mining)
+        self.selector.bind("<Return>", self.run_data_mining)
+        self.treeview.bind('<ButtonRelease-1>', self.selectItem)
+
+        # focus on entry widget
+        self.entry.focus()
 
     def validate_input(self, event=None):
+        """validates and sanitizes user input"""
         _input = self.entry.get()
         if _input:
             validated_input = self.validator.validate(_input)
@@ -69,6 +75,7 @@ class Gui(tk.Frame):
                 self.status['text'] = validated_input[1]
                 self.selector['values'] = validated_input[2]
                 self.selector.current(0)
+                self.selector.focus()
             else:
                 self.status['text'] = "input: invalid"
         elif not _input:
@@ -78,13 +85,27 @@ class Gui(tk.Frame):
 
     def run_data_mining(self, event=None):
         """Performs the select OSINT data mining operation"""
+        self.status['text'] = "running..."
         _input = self.entry.get()
         transform = self.selector.get()
         try:
             data = self.validator.execute_transform(_input, transform)
             self.treeview.insert('', 'end', text=_input, values=(transform, data))
+            # todo: focus on last treeview output to be able to hit enter and iterate
+            # item = self.treeview.insert('', 'end', text=_input, values=(transform, data))
+            # self.treeview.focus_set()
+            # self.treeview.selection_set(item)
+            self.entry.focus()
+            self.status['text'] = "ready"
         except Exception as e:
             messagebox.showerror("Error", "Error message:" + str(e))
+
+    def selectItem(self, event=None):
+        """selects item in treeview and inserts in search box"""
+        curItem = self.treeview.focus()
+        self.entry.delete(0, 'end')
+        self.entry.insert(0, self.treeview.item(curItem)["values"][1])
+        self.validate_input()
 
     @staticmethod
     def quit_program():
