@@ -6,3 +6,6 @@
 !.vscode/extensions.json
 *.exe
 __pycache__
+build
+dist
+*.spec
