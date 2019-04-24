@@ -2,7 +2,7 @@ import datetime
 import tkinter as tk
 from tkinter import messagebox
 import tkinter.ttk as ttk
-from utils import InputValidator
+from utils import InputValidator, load_icon
 
 __version__ = '1.0.0-beta'
 
@@ -32,6 +32,7 @@ class Gui(tk.Frame):
     def __init__(self, master=None, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
         self.validator = InputValidator()
+        self.icon = load_icon()
         self.build_menu()
         self.build_interface()
         self.id_tracker = dict()
@@ -181,7 +182,7 @@ class Gui(tk.Frame):
         # launch window and configure window settings
         self.win_credits = CreditsTool(self)
         self.win_credits.title('')
-        self.win_credits.iconbitmap('icon.ico')
+        self.win_credits.iconbitmap(self.icon)
         self.win_credits.geometry('+%d+%d' % (root.winfo_x() +
                                               20, root.winfo_y() + 20))
         self.win_credits.resizable(width=False, height=False)
@@ -203,6 +204,6 @@ if __name__ == '__main__':
     pockint = Gui(root)
     root.config(menu=pockint.top)
     pockint.pack(expand=False)
-    root.iconbitmap('icon.ico')
+    root.iconbitmap(pockint.icon)
     root.protocol('WM_DELETE_WINDOW', pockint.quit_program)
     root.mainloop()
