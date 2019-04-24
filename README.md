@@ -1,5 +1,4 @@
-![Icon](https://github.com/netevert/pockint/blob/master/docs/icon.png)
-POCKINT
+POCKINT ![Icon](https://github.com/netevert/pockint/blob/master/docs/icon.png)
 =======
 [![GitHub release](https://img.shields.io/github/release/netevert/pockint.svg?style=flat-square)](https://github.com/netevert/delator/releases)
 [![Maintenance](https://img.shields.io/maintenance/yes/2019.svg?style=flat-square)]()
