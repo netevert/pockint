@@ -1,11 +1,38 @@
+#!/usr/bin/env python
+
 import base64
 import dns.resolver
 import os
 import re
 import socket as sock
 import tempfile
+from urllib.parse import urlparse
+import validators
 
-class IPAdress():
+class Md5Hash(object):
+    """Md5 hash handler class"""
+    def __init__(self):
+        self.osint_options = {}
+
+    def is_md5(self, _input: str):
+        """Validates if _input is an md5 hash"""
+        if validators.hashes.md5(_input):
+            return True
+        return False
+
+class Url(object):
+    """Url handler class"""
+    def __init__(self):
+        self.osint_options = {}
+
+    def is_url(self, _input: str):
+        """Validates if _input is a url"""
+        if validators.url(_input):
+            return True
+        return False
+
+class IPAdress(object):
+    """Ip address handler class"""
     def __init__(self):
         self.osint_options = {
             "reverse lookup": self.reverse_lookup,
@@ -14,13 +41,15 @@ class IPAdress():
         }
 
     def is_ip_address(self, _input: str):
+        """Validates if _input is ip address"""
         try:
             sock.inet_aton(_input)
             return True
         except sock.error:
             return False
 
-    def reverse_lookup(self, ip):
+    def reverse_lookup(self, ip: str):
+        """Returns PTR record for ip"""
         try:
             return [sock.gethostbyaddr(ip)[0]]
         except Exception as e:
@@ -30,7 +59,8 @@ class IPAdress():
     def ip_to_asn(self):
         pass
 
-class EmailAddress():
+class EmailAddress(object):
+    """Email address handler class"""
     def __init__(self):
         self.osint_options = {
             "haveibeenpwnd": self.hibp_lookup,
@@ -38,17 +68,20 @@ class EmailAddress():
         }
 
     def is_valid_email(self, _input: str):
-        if re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', _input):
+        """Checks if _input is a valid email"""
+        if re.match(r'^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', _input):
             return True
         return False
     
     def hibp_lookup(self):
         pass
 
-    def domain_extract(self, email):
+    def domain_extract(self, email: str):
+        """Returns domain from supplied email"""
         return [email.split("@")[1]]
 
-class Domain():
+class Domain(object):
+    """Domain handler class"""
     def __init__(self):
         self.osint_options = {
             "ip lookup" : self.to_a_record,
@@ -58,56 +91,71 @@ class Domain():
         }
 
     def is_valid_domain(self, _input: str):
-        if re.match('^((?!-))(xn--)?[a-z0-9][a-z0-9-_]{0,61}[a-z0-9]{0,1}\.(xn--)?([a-z0-9\-]{1,61}|[a-z0-9-]{1,30}\.[a-z]{2,})$', _input):
+        """Checks if _input is a domain"""
+        if re.match(r'^((?!-))(xn--)?[a-z0-9][a-z0-9-_]{0,61}[a-z0-9]{0,1}\.(xn--)?([a-z0-9\-]{1,61}|[a-z0-9-]{1,30}\.[a-z]{2,})$', _input):
             return True
         return False
     
-    def to_a_record(self, domain):
+    def to_a_record(self, domain: str):
+        """Returns dns a record for domain"""
         try:
             return [sock.gethostbyname(domain)]
         except Exception as e:
             raise e
 
-    def to_mx_records(self, domain):
+    def to_mx_records(self, domain: str):
+        """Returns dns mx record for domain"""
         try:
             return [x.exchange for x in dns.resolver.query(domain, 'MX')]
         except Exception as e:
             raise e
 
-    def to_txt_records(self, domain):
+    def to_txt_records(self, domain: str):
+        """Returns dns txt record for domain"""
         try:
             return [x.to_text() for x in dns.resolver.query(domain, 'TXT')]
         except Exception as e:
             raise e
 
-    def to_ns_records(self, domain):
+    def to_ns_records(self, domain: str):
+        """Returns ns record for domain"""
         try:
             return [x.to_text() for x in dns.resolver.query(domain, 'NS')]
         except Exception as e:
             raise e
 
-class InputValidator():
+class InputValidator(object):
+    """Handler to validate user inputs"""
     def __init__(self):
         self.ip = IPAdress()
         self.email = EmailAddress()
         self.domain = Domain()
+        self.url = Url()
+        self.md5 = Md5Hash()
 
     def run(self, _function, **kwargs):
+        """Runs function and associated keyword arguments"""
         try:
             return _function(**kwargs)
         except Exception as e:
             return e
 
-    def validate(self, _input):
+    def validate(self, _input: str):
+        """Functions to validate user inputs"""
         if self.ip.is_ip_address(_input):
             return [True, "input: ipv4 address", [option for option in self.ip.osint_options.keys()]]
         elif self.email.is_valid_email(_input):
             return [True, "input: email address", [option for option in self.email.osint_options.keys()]]
         elif self.domain.is_valid_domain(_input):
             return [True, "input: domain", [option for option in self.domain.osint_options.keys()]]
+        elif self.url.is_url(_input):
+            return [True, "input: url", [option for option in self.url.osint_options.keys()]]
+        elif self.md5.is_md5(_input):
+            return [True, "input: md5", [option for option in self.md5.osint_options.keys()]]
         return [False, []]
 
     def execute_transform(self, _input: str, transform: str):
+        """Function to run osint data mining tasks appropriate to each input"""
         if self.ip.is_ip_address(_input):
             return self.run(self.ip.osint_options.get(transform), ip=_input)
         elif self.email.is_valid_email(_input):
@@ -116,6 +164,8 @@ class InputValidator():
             return self.run(self.domain.osint_options.get(transform), domain=_input)
 
 def load_icon():
+    """loads and returns program icon from base64 string"""
+    # workaround from https://stackoverflow.com/questions/9929479/embed-icon-in-python-script
     icondata = base64.b64decode(icon)
     tempFile = tempfile.gettempdir() + "icon.ico"
     iconfile = open(tempFile,"wb")
