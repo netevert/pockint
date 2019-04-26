@@ -9,6 +9,18 @@ import tempfile
 from urllib.parse import urlparse
 import validators
 
+class Database(object):
+    """Local sqlite database handler class"""
+    def __init__(self):
+        pass
+    
+    def create_database(self):
+        """Creates a new database in AppData/Roaming"""
+        pass
+
+    def insert_api_key(self):
+        pass
+
 class Md5Hash(object):
     """Md5 hash handler class"""
     def __init__(self):
