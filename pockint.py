@@ -14,7 +14,13 @@ class CreditsTool(tk.Toplevel):
     def __init__(self, master=None, *args, **kwargs):
         """Initializes Toplevel object and builds credit interface."""
         super().__init__(master, *args, **kwargs)
+        # hide window in background during drawing and load, to prevent flickering and glitches as per
+        # https://stackoverflow.com/questions/48492273/preloading-windows-to-avoid-tkinter-visual-glitches-during-frame-load
+        self.withdraw()
+        # build and draw the window
         self.build()
+        # unhide the Toplevel window immediately after draw and load 
+        self.after(0, self.deiconify)
 
     def build(self):
         """Initializes and builds application widgets."""
@@ -182,11 +188,11 @@ class Gui(tk.Frame):
     def view_credits(self):
         """ Opens a new window providing credits information"""
         # launch window and configure window settings
-        self.win_credits = CreditsTool(self)
+        self.win_credits = CreditsTool()
         self.win_credits.title('')
-        self.win_credits.iconbitmap(self.icon)
         self.win_credits.geometry('+%d+%d' % (root.winfo_x() +
                                               20, root.winfo_y() + 20))
+        self.win_credits.iconbitmap(self.icon)
         self.win_credits.resizable(width=False, height=False)
         # set focus on window
         self.win_credits.grab_set()
