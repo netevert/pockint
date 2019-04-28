@@ -5,6 +5,7 @@ import dns.resolver
 import os
 import re
 import socket as sock
+import sqlite3
 import tempfile
 from urllib.parse import urlparse
 import validators
@@ -12,13 +13,33 @@ import validators
 class Database(object):
     """Local sqlite database handler class"""
     def __init__(self):
-        pass
-    
+        """Initialises application database, if app db doesn't exist, it creates one"""
+        
+        # verify that db folder exists, if not create one
+        self.db_path = os.getenv("LOCALAPPDATA")+ "\pockint\\"
+        if not os.path.exists(self.db_path):
+            os.makedirs(self.db_path)
+            self.create_database()
+        
+        # connect to database
+        db = sqlite3.connect(self.db_path + "\\.pockint.db")
+        self.cursor = db.cursor()
+
     def create_database(self):
-        """Creates a new database in AppData/Roaming"""
-        pass
+        """Creates a new database in AppData/Local"""
+        db = sqlite3.connect(self.db_path + "\\.pockint.db")
+        cursor = db.cursor()
+        cursor.execute('''CREATE TABLE api_keys(id INTEGER PRIMARY KEY, api_name TEXT,
+                       api_key TEXT, status INTEGER)''')
+        init_data = [("virustotal", "", 0), ("shodan", "", 0)]
+        cursor.executemany(''' INSERT INTO api_keys(api_name, api_key, status) VALUES(?,?,?)''', init_data)
+        db.commit()
+        db.close()
 
     def insert_api_key(self):
+        pass
+
+    def delete_api_key(self):
         pass
 
 class Md5Hash(object):
