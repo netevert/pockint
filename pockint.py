@@ -34,6 +34,22 @@ class CreditsTool(tk.Toplevel):
 
         self.lbl_info.grid(row=0, column=0, sticky='w', padx=1, pady=1)
 
+class ApiTool(tk.Toplevel):
+    """Opens a new window providing users ability to input api keys"""
+
+    def __init__(self, master=None, *args, **kwargs):
+        """Initializes Toplevel object and builds credit interface."""
+        super().__init__(master, *args, **kwargs)
+        # hide window in background during drawing and load, to prevent flickering and glitches as per
+        # https://stackoverflow.com/questions/48492273/preloading-windows-to-avoid-tkinter-visual-glitches-during-frame-load
+        self.withdraw()
+        # build and draw the window
+        self.build()
+        # unhide the Toplevel window immediately after draw and load 
+        self.after(0, self.deiconify)
+
+    def build(self):
+        pass
 
 class Gui(tk.Frame):
     """Main program graphical user interface"""
@@ -60,7 +76,7 @@ class Gui(tk.Frame):
 
         # create edit menu
         self.edit = tk.Menu(self.top, tearoff=False)
-        self.edit.add_command(label='API keys', command="#",
+        self.edit.add_command(label='API keys', command=self.manage_apis,
                               compound=tk.LEFT, underline=0)
         self.top.add_cascade(label='Edit', menu=self.edit, underline=0)
 
@@ -127,7 +143,7 @@ class Gui(tk.Frame):
         self.entry.focus()
 
     def validate_input(self, event=None):
-        """validates and sanitizes user input"""
+        """Validates and sanitizes user input"""
         _input = self.entry.get()
         if _input:
             validated_input = self.validator.validate(_input)
@@ -167,7 +183,7 @@ class Gui(tk.Frame):
             messagebox.showerror("Error", "Error message:" + str(e))
     
     def getID(self, item):  
-        """grabs the ID of the queried treeview item"""
+        """Grabs the ID of the queried treeview item"""
         if item in self.id_tracker.keys():
             return self.id_tracker[item]
         else:
@@ -176,7 +192,7 @@ class Gui(tk.Frame):
             return _id
 
     def selectItem(self, event=None):
-        """selects item in treeview and inserts in search box"""
+        """Selects item in treeview and inserts in search box"""
         curItem = self.treeview.focus()
         self.entry.delete(0, 'end')
         try:
@@ -186,7 +202,7 @@ class Gui(tk.Frame):
         self.validate_input()
 
     def view_credits(self):
-        """ Opens a new window providing credits information"""
+        """Opens a new window providing credits information"""
         # launch window and configure window settings
         self.win_credits = CreditsTool()
         self.win_credits.title('')
@@ -200,6 +216,22 @@ class Gui(tk.Frame):
 
         # start mainloop
         self.win_credits.mainloop()
+
+    def manage_apis(self):
+        """Opens a new window allowing user to manage api keys"""
+        # launch window and configure window settings
+        self.api_tool = ApiTool()
+        self.api_tool.title('')
+        self.api_tool.geometry('+%d+%d' % (root.winfo_x() +
+                                              20, root.winfo_y() + 20))
+        self.api_tool.iconbitmap(self.icon)
+        self.api_tool.resizable(width=False, height=False)
+        # set focus on window
+        self.api_tool.grab_set()
+        self.api_tool.focus()
+
+        # start mainloop
+        self.api_tool.mainloop()
 
     @staticmethod
     def quit_program():
