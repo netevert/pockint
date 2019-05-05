@@ -16,31 +16,68 @@ class Database(object):
         """Initialises application database, if app db doesn't exist, it creates one"""
         
         # verify that db folder exists, if not create one
-        self.db_path = os.getenv("LOCALAPPDATA")+ "\pockint\\"
+        self.db_path = os.getenv("LOCALAPPDATA")+ "\\pockint\\"
         if not os.path.exists(self.db_path):
             os.makedirs(self.db_path)
             self.create_database()
         
         # connect to database
-        db = sqlite3.connect(self.db_path + "\\.pockint.db")
-        self.cursor = db.cursor()
+        self.db = sqlite3.connect(self.db_path + "\\.pockint.db")
+        self.cursor = self.db.cursor()
 
     def create_database(self):
         """Creates a new database in AppData/Local"""
         db = sqlite3.connect(self.db_path + "\\.pockint.db")
         cursor = db.cursor()
-        cursor.execute('''CREATE TABLE api_keys(id INTEGER PRIMARY KEY, api_name TEXT,
-                       api_key TEXT, status INTEGER)''')
-        init_data = [("virustotal", "", 0), ("shodan", "", 0)]
-        cursor.executemany(''' INSERT INTO api_keys(api_name, api_key, status) VALUES(?,?,?)''', init_data)
-        db.commit()
-        db.close()
+        try:
+            cursor.execute('''CREATE TABLE api_keys(id INTEGER PRIMARY KEY, api_name TEXT,
+                        api_key TEXT, status INTEGER)''')
+            init_data = [("virustotal", "", 0), ("shodan", "", 0)]
+            cursor.executemany(''' INSERT INTO api_keys(api_name, api_key, status) VALUES(?,?,?)''', init_data)
+            db.commit()
+            db.close()
+        except sqlite3.Error:
+            db.rollback()
 
-    def insert_api_key(self):
-        pass
+    def insert_api_key(self, api: str, _key: str):
+        """Updates the api key value and status for the given api"""
+        try:
+            if _key:
+                self.cursor.execute('''UPDATE api_keys SET api_key=?, status=1 WHERE api_name=?''', (_key, api))
+                self.db.commit()
+            if not _key:
+                self.cursor.execute('''UPDATE api_keys SET api_key=?, status=0 WHERE api_name=?''', (_key, api))
+                self.db.commit()
+        except sqlite3.Error:
+            self.db.rollback()
 
-    def delete_api_key(self):
-        pass
+    def get_api_key(self, api: str):
+        """Returns the api key for the supplied api name"""
+        try:
+            self.cursor.execute('''SELECT api_key FROM api_keys WHERE api_name=?''', (api,))
+            return self.cursor.fetchone()[0]
+        except sqlite3.Error:
+            self.db.rollback()
+
+    def get_available_apis(self):
+        """Returns api's that have an associated api key"""
+        try:
+            self.cursor.execute('''SELECT api_name FROM api_keys WHERE status=1''')
+            return [api[0] for api in self.cursor.fetchall()]
+        except sqlite3.Error:
+            self.db.rollback()
+
+    def get_apis(self):
+        """Returns all api's available in the database"""
+        try:
+            self.cursor.execute('''SELECT api_name FROM api_keys''')
+            return [api[0] for api in self.cursor.fetchall()]
+        except sqlite3.Error:
+            self.db.rollback()
+
+    def close_connection(self):
+        """Closes the connection to the local database file"""
+        self.db.close()
 
 class Md5Hash(object):
     """Md5 hash handler class"""
