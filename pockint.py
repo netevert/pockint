@@ -4,7 +4,7 @@ import datetime
 import tkinter as tk
 from tkinter import messagebox
 import tkinter.ttk as ttk
-from utils import InputValidator, load_icon
+from utils import InputValidator, Database, load_icon
 
 __version__ = '1.0.0-beta'
 
@@ -40,6 +40,7 @@ class ApiTool(tk.Toplevel):
     def __init__(self, master=None, *args, **kwargs):
         """Initializes Toplevel object and builds credit interface."""
         super().__init__(master, *args, **kwargs)
+        self.db_handler = Database()
         # hide window in background during drawing and load, to prevent flickering and glitches as per
         # https://stackoverflow.com/questions/48492273/preloading-windows-to-avoid-tkinter-visual-glitches-during-frame-load
         self.withdraw()
@@ -49,7 +50,58 @@ class ApiTool(tk.Toplevel):
         self.after(0, self.deiconify)
 
     def build(self):
-        pass
+        """Initializes and builds application widgets."""
+        # create input labelframe
+        labelframe_1 = tk.LabelFrame(self, text="api key manager", fg='brown')
+        labelframe_1.pack(side="top", expand='yes', fill='both', padx=2, pady=2, anchor="n") 
+        
+        # create data mining action selection drop down
+        self.selector = ttk.Combobox(labelframe_1, values=self.db_handler.get_apis(), state="readonly", width=50)
+        self.selector.current(0)
+        self.selector.pack(expand=True, fill='x', side="top", padx=2, pady=2)
+
+        # create data input entry widget
+        self.entry = tk.Entry(labelframe_1)
+        self.entry.pack(expand=True, fill='x', side="top", padx=2, pady=2)
+
+        # create status label
+        self.status = tk.Label(self, text='hit return to store api key', font=('verdana', 6, 'normal'))
+        self.status.pack(anchor='se')
+
+        # gui bindings
+        self.selector.bind("<<ComboboxSelected>>", self.grab_api_key)
+        self.selector.bind("<Return>", self.grab_api_key)
+        self.entry.bind('<Return>', self.add_api_key)
+
+    def grab_api_key(self, event=None):
+        """Returns api key of selected api"""
+        api = self.selector.get()
+        _key = self.db_handler.get_api_key(api)
+        self.entry.delete(0, tk.END)
+        self.entry.insert(0, _key)
+        self.status['text'] = "api key retrieved"
+        if not _key:
+            self.status['text'] = "no api key exists, create one?"
+
+    def add_api_key(self, event=None):
+        """Adds api key in database"""
+        _key = self.entry.get()
+        if self.entry.get():
+            self.db_handler.insert_api_key(self.selector.get(), self.entry.get())
+            self.grab_api_key()
+            self.status['text'] = "api key added"
+        if not self.entry.get():
+            if self.db_handler.get_api_key(self.selector.get()):
+                self.db_handler.insert_api_key(self.selector.get(), self.entry.get())
+                self.grab_api_key()
+                self.status['text'] = "api key deleted"
+            else:
+                self.status['text'] = "no api key provided"
+
+    def close_window(self):
+        """Closes program window and database"""
+        self.db_handler.close_connection()
+        self.destroy()
 
 class Gui(tk.Frame):
     """Main program graphical user interface"""
@@ -226,6 +278,7 @@ class Gui(tk.Frame):
                                               20, root.winfo_y() + 20))
         self.api_tool.iconbitmap(self.icon)
         self.api_tool.resizable(width=False, height=False)
+        self.api_tool.protocol('WM_DELETE_WINDOW', self.api_tool.close_window)
         # set focus on window
         self.api_tool.grab_set()
         self.api_tool.focus()
