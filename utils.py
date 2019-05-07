@@ -5,6 +5,7 @@ import dns.resolver
 import os
 import re
 import socket as sock
+import shodan
 import sqlite3
 import tempfile
 from urllib.parse import urlparse
@@ -105,10 +106,21 @@ class IPAdress(object):
     """Ip address handler class"""
     def __init__(self):
         self.osint_options = {
-            "reverse lookup": self.reverse_lookup,
-            # "ip to asn": self.ip_to_asn,
-            # "ipv4 CIDR report": self.reverse_lookup
+            "dns: reverse lookup": self.reverse_lookup,
+            # "dns: ip to asn": self.ip_to_asn,
         }
+        self.api_db = Database()
+        shodan_api_key = self.api_db.get_api_key("shodan")
+        if shodan_api_key:
+            self.shodan_api = shodan.Shodan(shodan_api_key)
+            self.osint_options.update({
+            "shodan: ports": self.ip_to_shodan_ports,
+            "shodan: geolocate": self.ip_to_shodan_country_name,
+            "shodan: coordinates": self.ip_to_shodan_coordinates,
+            "shodan: cve's": self.ip_to_shodan_cves,
+            "shodan: isp": self.ip_to_shodan_isp,
+            "shodan: city": self.ip_to_shodan_city,
+            "shodan: asn": self.ip_to_shodan_asn})
 
     def is_ip_address(self, _input: str):
         """Validates if _input is ip address"""
@@ -128,6 +140,83 @@ class IPAdress(object):
     
     def ip_to_asn(self):
         pass
+
+    def ip_to_shodan_ports(self, ip:str):
+        """Searches shodan to see if any ports are open on the target ip"""
+        try:
+            data = self.shodan_api.host(ip)["ports"]
+            if data:
+                return data
+            else:
+                return ["no data available"]
+        except Exception as e:
+            return ["shodan api error: ", e]
+
+    def ip_to_shodan_country_name(self, ip:str):
+        """Searches shodan to determine the target ip's location"""
+        try:
+            data = self.shodan_api.host(ip)["country_name"]
+            if data:
+                return [data]
+            else:
+                return ["no data available"]
+        except Exception as e:
+            return ["shodan api error: ", e]
+
+    def ip_to_shodan_coordinates(self, ip:str):
+        """Searches shodan to determine the target ip's location co-ordinates"""
+        try:
+            latitude, longitude = self.shodan_api.host(ip)["latitude"], self.shodan_api.host(ip)["longitude"]
+            if latitude and longitude:
+                return [str(latitude) + "," + str(longitude)]
+            else:
+                return ["no data available"]
+        except Exception as e:
+            return ["shodan api error: ", e]
+
+    def ip_to_shodan_cves(self, ip:str):
+        """Searches shodan to determine if the ip is vulnerable to CVE's"""
+        try:
+            vulns = self.shodan_api.host(ip)["vulns"]
+            if vulns:
+                return vulns
+            else:
+                return ["no data available"]
+        except Exception as e:
+            return ["shodan api error: ", e]
+    
+    def ip_to_shodan_isp(self, ip:str):
+        """Searches shodan to determine the ip's ISP"""
+        try:
+            isp = self.shodan_api.host(ip)["isp"]
+            if isp:
+                return [isp]
+            else:
+                return ["no data available"]
+        except Exception as e:
+            return ["shodan api error: ", e]
+
+    def ip_to_shodan_city(self, ip:str):
+        """Searches shodan to determine the ip's ISP"""
+        try:
+            city = self.shodan_api.host(ip)["city"]
+            if city:
+                return [city]
+            else:
+                return ["no data available"]
+        except Exception as e:
+            return ["shodan api error: ", e]
+
+    def ip_to_shodan_asn(self, ip:str):
+        """Searches shodan to determine the ip's ASN"""
+        try:
+            asn = self.shodan_api.host(ip)["asn"]
+            if asn:
+                return [asn]
+            else:
+                return ["no data available"]
+        except Exception as e:
+            return ["shodan api error: ", e]
 
 class EmailAddress(object):
     """Email address handler class"""
@@ -154,10 +243,10 @@ class Domain(object):
     """Domain handler class"""
     def __init__(self):
         self.osint_options = {
-            "ip lookup" : self.to_a_record,
-            "mx lookup" : self.to_mx_records,
-            "txt lookup": self.to_txt_records,
-            "ns lookup" : self.to_ns_records
+            "dns: ip lookup" : self.to_a_record,
+            "dns: mx lookup" : self.to_mx_records,
+            "dns: txt lookup": self.to_txt_records,
+            "dns: ns lookup" : self.to_ns_records
         }
 
     def is_valid_domain(self, _input: str):

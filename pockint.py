@@ -107,7 +107,6 @@ class Gui(tk.Frame):
     """Main program graphical user interface"""
     def __init__(self, master=None, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
-        self.validator = InputValidator()
         self.icon = load_icon()
         self.build_menu()
         self.build_interface()
@@ -196,6 +195,7 @@ class Gui(tk.Frame):
 
     def validate_input(self, event=None):
         """Validates and sanitizes user input"""
+        self.validator = InputValidator()
         _input = self.entry.get()
         if _input:
             validated_input = self.validator.validate(_input)
