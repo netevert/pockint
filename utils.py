@@ -246,8 +246,13 @@ class Domain(object):
             "dns: ip lookup" : self.to_a_record,
             "dns: mx lookup" : self.to_mx_records,
             "dns: txt lookup": self.to_txt_records,
-            "dns: ns lookup" : self.to_ns_records
+            "dns: ns lookup" : self.to_ns_records,
         }
+        self.api_db = Database()
+        shodan_api_key = self.api_db.get_api_key("shodan")
+        if shodan_api_key:
+            self.shodan_api = shodan.Shodan(shodan_api_key)
+            self.osint_options.update({"shodan: hostnames": self.to_shodan_hostnames})
 
     def is_valid_domain(self, _input: str):
         """Checks if _input is a domain"""
@@ -282,6 +287,21 @@ class Domain(object):
             return [x.to_text() for x in dns.resolver.query(domain, 'NS')]
         except Exception as e:
             raise e
+
+    def to_shodan_hostnames(self, domain: str):
+        """Searches shodan to discover hostnames associated with the domain"""
+        try:
+            data = []
+            results = self.shodan_api.search("hostname:{}".format(domain))
+            if results:
+                for r in results["matches"]:
+                    for h in r["hostnames"]:
+                        data.append(h)
+                return data
+            else:
+                return ["no data available"]
+        except Exception as e:
+            return ["shodan api error: ", e]
 
 class InputValidator(object):
     """Handler to validate user inputs"""
