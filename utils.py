@@ -4,6 +4,7 @@ import base64
 import dns.resolver
 import os
 import re
+import requests
 import socket as sock
 import shodan
 import sqlite3
@@ -121,10 +122,13 @@ class IPAdress(object):
             "shodan: isp": self.ip_to_shodan_isp,
             "shodan: city": self.ip_to_shodan_city,
             "shodan: asn": self.ip_to_shodan_asn})
-        virustotal_api_key = self.api_db.get_api_key("virustotal")
-        if virustotal_api_key:
+        self.virustotal_api_key = self.api_db.get_api_key("virustotal")
+        if self.virustotal_api_key:
             self.osint_options.update({
-                "virustotal: report": self.ip_to_vt_report
+                "virustotal: network report": self.ip_to_vt_network_report,
+                "virustotal: communicating samples": self.ip_to_vt_communicating_samples,
+                "virustotal: downloaded samples": self.ip_to_vt_downloaded_samples,
+                "virustotal: detected urls": self.ip_to_vt_detected_urls
             })
 
     def is_ip_address(self, _input: str):
@@ -223,8 +227,68 @@ class IPAdress(object):
         except Exception as e:
             return ["shodan api error: ", e]
 
-    def ip_to_vt_report(self, ip:str):
-        """Searches virustotal to return an ip report"""
+    def ip_to_vt_network_report(self, ip:str):
+        """Searches virustotal to return an ip network report"""
+        try:
+            data = make_vt_api_request(
+                "https://www.virustotal.com/vtapi/v2/ip-address/report",
+                self.virustotal_api_key,
+                {"ip":ip}
+            )
+            if data:
+                return ["asn owner: {}".format(data.json().get("as_owner")),
+                "asn: {}".format(data.json().get("asn")),
+                "continent: {}".format(data.json().get("continent")),
+                "country: {}".format(data.json().get("country")),
+                "network: {}".format(data.json().get("network")),
+                "whois: {}".format(data.json().get("whois"))
+                ]
+            else:
+                return ["no data available"]
+        except Exception as e:
+            return ["virustotal api error: ", e]
+
+    def ip_to_vt_communicating_samples(self, ip:str):
+        """Searches virustotal to search for detected communicating samples"""
+        try:
+            data = make_vt_api_request(
+                "https://www.virustotal.com/vtapi/v2/ip-address/report",
+                self.virustotal_api_key,
+                {"ip":ip})
+            if data:
+                return [record.get("sha256") for record in data.json()["detected_communicating_samples"]]
+            else:
+                return ["no data available"]
+        except Exception as e:
+            return ["virustotal api error: ", e]
+    
+    def ip_to_vt_downloaded_samples(self, ip:str):
+        """Searches virustotal to search for detected communicating samples"""
+        try:
+            data = make_vt_api_request(
+                "https://www.virustotal.com/vtapi/v2/ip-address/report",
+                self.virustotal_api_key,
+                {"ip":ip})
+            if data:
+                return [record.get("sha256") for record in data.json()["detected_downloaded_samples"]]
+            else:
+                return ["no data available"]
+        except Exception as e:
+            return ["virustotal api error: ", e]
+    
+    def ip_to_vt_detected_urls(self, ip:str):
+        """Searches virustotal to search for detected communicating samples"""
+        try:
+            data = make_vt_api_request(
+                "https://www.virustotal.com/vtapi/v2/ip-address/report",
+                self.virustotal_api_key,
+                {"ip":ip})
+            if data:
+                return [record.get("url") for record in data.json()["detected_urls"]]
+            else:
+                return ["no data available"]
+        except Exception as e:
+            return ["virustotal api error: ", e]
 
 class EmailAddress(object):
     """Email address handler class"""
@@ -360,6 +424,16 @@ def load_icon():
     iconfile.write(icondata)
     iconfile.close()
     return tempFile
+
+def make_vt_api_request(url: str, api_key: str, search_params: dict):
+    """Helper function to interrogate virustotal public api"""
+    try:
+        params = {"apikey": api_key}
+        params.update(search_params)
+        headers = {'User-Agent': 'Pockint v.1.0.0-beta'}
+        return requests.get(url, params=params, headers=headers)
+    except Exception as e:
+        return e
 
 icon = \
 """
