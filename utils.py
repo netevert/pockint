@@ -121,6 +121,11 @@ class IPAdress(object):
             "shodan: isp": self.ip_to_shodan_isp,
             "shodan: city": self.ip_to_shodan_city,
             "shodan: asn": self.ip_to_shodan_asn})
+        virustotal_api_key = self.api_db.get_api_key("virustotal")
+        if virustotal_api_key:
+            self.osint_options.update({
+                "virustotal: report": self.ip_to_vt_report
+            })
 
     def is_ip_address(self, _input: str):
         """Validates if _input is ip address"""
@@ -217,6 +222,9 @@ class IPAdress(object):
                 return ["no data available"]
         except Exception as e:
             return ["shodan api error: ", e]
+
+    def ip_to_vt_report(self, ip:str):
+        """Searches virustotal to return an ip report"""
 
 class EmailAddress(object):
     """Email address handler class"""
