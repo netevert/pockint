@@ -245,6 +245,7 @@ class Gui(tk.Frame):
 
     def selectItem(self, event=None):
         """Selects item in treeview and inserts in search box"""
+        # todo: select node element in treeview
         curItem = self.treeview.focus()
         self.entry.delete(0, 'end')
         try:

@@ -81,10 +81,69 @@ class Database(object):
         """Closes the connection to the local database file"""
         self.db.close()
 
+class Sha256Hash(object):
+    """Md5 hash handler class"""
+    def __init__(self):
+        self.osint_options = {}
+        self.api_db = Database()
+        self.virustotal_api_key = self.api_db.get_api_key("virustotal")
+        if self.virustotal_api_key:
+            self.osint_options.update({ 
+                "virustotal: malicious check": self.virustotal_is_malicious,
+                "virustotal: malware type": self.virustotal_malware_type})
+    
+    def is_sha256(self, _input: str):
+        """Validates if _input is an md5 hash"""
+        if validators.hashes.sha256(_input):
+            return True
+        return False
+
+    def virustotal_is_malicious(self, _hash:str):
+        """Checks virustotal to see if sha256 has positive detections"""
+        try:
+            data = make_vt_api_request(
+                "https://www.virustotal.com/vtapi/v2/file/report",
+                self.virustotal_api_key,
+                {"resource": _hash}
+            )
+            if data:
+                if data.json().get("response_code") == 0:
+                    return ["no report available"]
+                return ["hash malicious: {} detections".format(data.json().get("positives"))]
+            else:
+                return ["no data available"]
+        except Exception as e:
+            return ["virustotal api error: ", e]
+
+    def virustotal_malware_type(self, _hash:str):
+        """Checks virustotal to return malware types detected by scans"""
+        try:
+            data = make_vt_api_request(
+                "https://www.virustotal.com/vtapi/v2/file/report",
+                self.virustotal_api_key,
+                {"resource": _hash}
+            )
+            if data:
+                if data.json().get("response_code") == 1:
+                    return ["{}: {}".format(i, data.json().get("scans").get(i).get("result")) 
+                    for i in data.json().get("scans") 
+                    if data.json().get("scans").get(i).get("result")]
+                return ["no report available"]
+            else:
+                return ["no data available"]
+        except Exception as e:
+            return ["virustotal api error: ", e]
+
 class Md5Hash(object):
     """Md5 hash handler class"""
     def __init__(self):
         self.osint_options = {}
+        self.api_db = Database()
+        self.virustotal_api_key = self.api_db.get_api_key("virustotal")
+        if self.virustotal_api_key:
+            self.osint_options.update({
+                "virustotal: malicious check": self.virustotal_is_malicious,
+                "virustotal: malware type": self.virustotal_malware_type})
 
     def is_md5(self, _input: str):
         """Validates if _input is an md5 hash"""
@@ -92,16 +151,106 @@ class Md5Hash(object):
             return True
         return False
 
+    def virustotal_is_malicious(self, _hash:str):
+        """Checks virustotal to see if MD5 has positive detections"""
+        try:
+            data = make_vt_api_request(
+                "https://www.virustotal.com/vtapi/v2/file/report",
+                self.virustotal_api_key,
+                {"resource": _hash}
+            )
+            if data:
+                if data.json().get("response_code") == 0:
+                    return ["no report available"]
+                return ["hash malicious: {} detections".format(data.json().get("positives"))]
+            else:
+                return ["no data available"]
+        except Exception as e:
+            return ["virustotal api error: ", e]
+
+    def virustotal_malware_type(self, _hash:str):
+        """Checks virustotal to return malware types detected by scans"""
+        try:
+            data = make_vt_api_request(
+                "https://www.virustotal.com/vtapi/v2/file/report",
+                self.virustotal_api_key,
+                {"resource": _hash}
+            )
+            if data:
+                if data.json().get("response_code") == 1:
+                    return ["{}: {}".format(i, data.json().get("scans").get(i).get("result")) 
+                    for i in data.json().get("scans") 
+                    if data.json().get("scans").get(i).get("result")]
+                return ["no report available"]
+            else:
+                return ["no data available"]
+        except Exception as e:
+            return ["virustotal api error: ", e]
+
+
 class Url(object):
     """Url handler class"""
     def __init__(self):
-        self.osint_options = {}
+        self.osint_options = {
+            "dns: extract hostname": self.url_to_hostname
+        }
+        self.api_db = Database()
+        self.virustotal_api_key = self.api_db.get_api_key("virustotal")
+        if self.virustotal_api_key:
+            self.osint_options.update({
+                "virustotal: malicious check": self.is_malicious,
+                "virustotal: reported detections": self.reported_detections})
 
     def is_url(self, _input: str):
         """Validates if _input is a url"""
         if validators.url(_input):
             return True
         return False
+
+    def is_malicious(self, url: str):
+        """Checks if url is malicious"""
+        try:
+            data = make_vt_api_request(
+                "https://www.virustotal.com/vtapi/v2/url/report",
+                self.virustotal_api_key,
+                {"resource": url}
+            )
+            if data:
+                if data.json().get("response_code") == 1:
+                    return ["url malicious: {} detections".format(data.json().get("positives"))]
+                return ["no report available"]
+            else:
+                return ["no data available"]
+        except Exception as e:
+            return ["virustotal api error: ", e]
+
+    def reported_detections(self, url: str):
+        """Checks virustotal to determine which sites are reporting the url"""
+        try:
+            data = make_vt_api_request(
+                "https://www.virustotal.com/vtapi/v2/url/report",
+                self.virustotal_api_key,
+                {"resource": url}
+            )
+            if data:
+                if data.json().get("response_code") == 1:
+                    return ["{}: {}".format(i, data.json().get("scans").get(i).get("result"))
+                    for i in data.json().get("scans")
+                    if (data.json().get("scans").get(i).get("result") == "malicious site") or  
+                    (data.json().get("scans").get(i).get("result") == "malware site")]
+                return ["no report available"]
+            else:
+                return ["no data available"]
+        except Exception as e:
+            return ["virustotal api error: ", e] # todo: change to return ["error: " + e]
+
+    def url_to_hostname(self, url: str):
+        """Extracts hostname from url"""
+        try:
+            return [urlparse(url).netloc]
+        except Exception as e:
+            return ["error: " + e]
+
 
 class IPAdress(object):
     """Ip address handler class"""
@@ -288,13 +437,13 @@ class IPAdress(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["virustotal api error: ", e]
+            return ["virustotal api error: ", e]  # todo: return ["virustotal api error: " + e]
+
 
 class EmailAddress(object):
     """Email address handler class"""
     def __init__(self):
         self.osint_options = {
-            "haveibeenpwnd": self.hibp_lookup,
             "extract domain": self.domain_extract
         }
 
@@ -311,6 +460,7 @@ class EmailAddress(object):
         """Returns domain from supplied email"""
         return [email.split("@")[1]]
 
+
 class Domain(object):
     """Domain handler class"""
     def __init__(self):
@@ -325,6 +475,13 @@ class Domain(object):
         if shodan_api_key:
             self.shodan_api = shodan.Shodan(shodan_api_key)
             self.osint_options.update({"shodan: hostnames": self.to_shodan_hostnames})
+        self.virustotal_api_key = self.api_db.get_api_key("virustotal")
+        if self.virustotal_api_key:
+            self.osint_options.update({
+                "virustotal: downloaded samples": self.domain_to_vt_downloaded_samples,
+                "virustotal: detected urls": self.domain_to_vt_detected_urls,
+                "virustotal: subdomains": self.domain_to_vt_subdomains
+            })
 
     def is_valid_domain(self, _input: str):
         """Checks if _input is a domain"""
@@ -344,7 +501,7 @@ class Domain(object):
         try:
             return [x.exchange for x in dns.resolver.query(domain, 'MX')]
         except Exception as e:
-            raise e
+            raise e  # todo: return ["virustotal api error: " + e]
 
     def to_txt_records(self, domain: str):
         """Returns dns txt record for domain"""
@@ -373,7 +530,50 @@ class Domain(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["shodan api error: ", e]
+            return ["shodan api error: " + e]
+
+    def domain_to_vt_detected_urls(self, domain:str):
+        """Searches virustotal to search for detected communicating samples"""
+        try:
+            data = make_vt_api_request(
+                "https://www.virustotal.com/vtapi/v2/domain/report",
+                self.virustotal_api_key,
+                {"domain":domain})
+            if data:
+                return [record.get("url") for record in data.json()["detected_urls"]]
+            else:
+                return ["no data available"]
+        except Exception as e:
+            return ["virustotal api error: " + e]
+
+    def domain_to_vt_downloaded_samples(self, domain:str):
+        """Searches virustotal to search for detected communicating samples"""
+        try:
+            data = make_vt_api_request(
+                "https://www.virustotal.com/vtapi/v2/domain/report",
+                self.virustotal_api_key,
+                {"domain":domain})
+            if data:
+                return [record.get("sha256") for record in data.json()["detected_downloaded_samples"]]
+            else:
+                return ["no data available"]
+        except Exception as e:
+            return ["virustotal api error: " + e]
+
+    def domain_to_vt_subdomains(self, domain: str):
+        """Searches virustotal for subdomains"""
+        try:
+            data = make_vt_api_request(
+                "https://www.virustotal.com/vtapi/v2/domain/report",
+                self.virustotal_api_key,
+                {"domain":domain})
+            if data:
+                return data.json().get("subdomains")
+            else:
+                return ["no data available"]
+        except Exception as e:
+            return ["virustotal api error: " + e]
+
 
 class InputValidator(object):
     """Handler to validate user inputs"""
@@ -383,6 +583,7 @@ class InputValidator(object):
         self.domain = Domain()
         self.url = Url()
         self.md5 = Md5Hash()
+        self.sha256 = Sha256Hash()
 
     def run(self, _function, **kwargs):
         """Runs function and associated keyword arguments"""
@@ -403,6 +604,8 @@ class InputValidator(object):
             return [True, "input: url", [option for option in self.url.osint_options.keys()]]
         elif self.md5.is_md5(_input):
             return [True, "input: md5", [option for option in self.md5.osint_options.keys()]]
+        elif self.sha256.is_sha256(_input):
+            return [True, "input: sha256", [option for option in self.sha256.osint_options.keys()]]
         return [False, []]
 
     def execute_transform(self, _input: str, transform: str):
@@ -413,6 +616,12 @@ class InputValidator(object):
             return self.run(self.email.osint_options.get(transform), email=_input)
         elif self.domain.is_valid_domain(_input):
             return self.run(self.domain.osint_options.get(transform), domain=_input)
+        elif self.md5.is_md5(_input):
+            return self.run(self.md5.osint_options.get(transform), _hash=_input)
+        elif self.url.is_url(_input):
+            return self.run(self.url.osint_options.get(transform), url=_input)
+        elif self.sha256.is_sha256(_input):
+            return self.run(self.sha256.osint_options.get(transform), _hash=_input)
 
 def load_icon():
     """loads and returns program icon from base64 string"""
