@@ -23,7 +23,7 @@ You can grab a testing copy from the [releases page](https://github.com/netevert
 
 Why use it? POCKINT is designed to be simple, portable and powerful.
 
-**Simple**: There's a plethora of awesome OSINT tools out there. Trouble is they either require analysts to be reasonably comfortable with the command line (think [pOSINT](pOSINThttps://github.com/ecstatic-nobel/pOSINT)) or give you way too many features (think [Maltego](https://www.paterva.com/web7/)). POCKINT focuses on simplicity: INPUT > RUN TRANSFORM > OUTPUT  ... rinse and repeat. It's the ideal tool to get results quickly and easily through a simple interface.
+**Simple**: There's a plethora of awesome OSINT tools out there. Trouble is they either require analysts to be reasonably comfortable with the command line (think [pOSINT](https://github.com/ecstatic-nobel/pOSINT)) or give you way too many features (think [Maltego](https://www.paterva.com/web7/)). POCKINT focuses on simplicity: INPUT > RUN TRANSFORM > OUTPUT  ... rinse and repeat. It's the ideal tool to get results quickly and easily through a simple interface.
 
 **Portable**: Most tools either require installation, a license or configuration. POCKINT is ready to go whenever and wherever. Put it in your jump kit USBs, investigation VMs or laptop and it will just run. Nobody needs graphs on an incident response :)
 
@@ -87,7 +87,7 @@ The beta version is capable of running the following data mining tasks:
 </p>
 </details>
 
-More API and input integrations are planned for the future. Consult the [roadmap](https://github.com/netevert/pockint/milestones) to check out what's brewing or [propose](https://github.com/netevert/pockint/issues) your own favourite API/input.
+More APIs and input integrations are planned for the future. Consult the [roadmap](https://github.com/netevert/pockint/milestones) to check out what's brewing or [propose](https://github.com/netevert/pockint/issues) your own favourite API/input.
 
 ## Credits
 
