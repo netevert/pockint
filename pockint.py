@@ -4,7 +4,7 @@ import datetime
 import tkinter as tk
 from tkinter import messagebox
 import tkinter.ttk as ttk
-from utils import InputValidator, Database, load_icon
+from utils import InputValidator, Database, load_icon, callback
 
 __version__ = '1.0.0'
 
@@ -24,15 +24,20 @@ class CreditsTool(tk.Toplevel):
 
     def build(self):
         """Initializes and builds application widgets."""
-        text_credits = 'POCKINT\nversion {ver}\n copyright © {year}\nnetevert' \
+        text_credits = 'POCKINT\nversion {ver}\n copyright © {year}' \
                        ''.format(year=datetime.datetime.now().year,
                                       ver=__version__)
+        author_info = "Written with ♥ by\nNetEvert"
 
         # create main credits label
         self.lbl_info = tk.Label(self, text=text_credits,
                                  font=('courier', 10, 'normal'))
+        self.lbl_author = tk.Label(self, text=author_info,
+                                 font=('courier', 10, 'normal'), cursor="hand2")
 
         self.lbl_info.grid(row=0, column=0, sticky='w', padx=1, pady=1)
+        self.lbl_author.grid(row=1, column=0, sticky='w', padx=1, pady=1)
+        self.lbl_author.bind("<Button-1>", lambda e: callback("https://twitter.com/netevert"))
 
 class ApiTool(tk.Toplevel):
     """Opens a new window providing users ability to input api keys"""

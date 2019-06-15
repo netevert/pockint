@@ -11,6 +11,7 @@ import sqlite3
 import tempfile
 from urllib.parse import urlparse
 import validators
+import webbrowser
 
 class Database(object):
     """Local sqlite database handler class"""
@@ -643,6 +644,9 @@ def make_vt_api_request(url: str, api_key: str, search_params: dict):
         return requests.get(url, params=params, headers=headers)
     except Exception as e:
         return e
+
+def callback(url):
+    webbrowser.open_new(url)
 
 icon = \
 """
