@@ -6,7 +6,7 @@ from tkinter import messagebox
 import tkinter.ttk as ttk
 from utils import InputValidator, Database, load_icon
 
-__version__ = '1.0.0-beta'
+__version__ = '1.0.0'
 
 class CreditsTool(tk.Toplevel):
     """Opens a new window providing credits"""
@@ -245,10 +245,11 @@ class Gui(tk.Frame):
 
     def selectItem(self, event=None):
         """Selects item in treeview and inserts in search box"""
-        # todo: select node element in treeview
-        curItem = self.treeview.focus()
+        curItem = self.treeview.identify("item", event.x, event.y)
         self.entry.delete(0, 'end')
         try:
+            if self.treeview.item(curItem)["text"]:
+                self.entry.insert(0, self.treeview.item(curItem)["text"])
             self.entry.insert(0, self.treeview.item(curItem)["values"][1])
         except IndexError:
             pass
