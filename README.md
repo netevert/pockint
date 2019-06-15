@@ -1,9 +1,8 @@
 ![Icon](https://github.com/netevert/pockint/blob/master/docs/icon.png)
 =======
-![made with python](https://img.shields.io/badge/-made%20with%20python-blue.svg?logo=python&style=flat-square&link=https://www.python.org/&logoColor=white)
+![made with python](https://img.shields.io/badge/-made%20with%20python-blue.svg?logo=python&style=flat-square&link=https://www.python.org//right&logoColor=white)
 ![Supported platforms](https://img.shields.io/badge/platform-Windows%20|%20Linux-informational.svg?style=flat-square)
 [![GitHub release](https://img.shields.io/github/release/netevert/pockint.svg?style=flat-square)](https://github.com/netevert/pockint/releases)
-[![Maintenance](https://img.shields.io/maintenance/yes/2019.svg?style=flat-square)]()
 [![GitHub last commit](https://img.shields.io/github/last-commit/netevert/pockint.svg?style=flat-square)](https://github.com/netevert/pockint/commit/master)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square&logo=github)](http://makeapullrequest.com)
 ![GitHub All Releases](https://img.shields.io/github/downloads/netevert/pockint/total.svg?style=flat-square)
