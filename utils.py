@@ -593,21 +593,35 @@ class InputValidator(object):
         except Exception as e:
             return e
 
+    def consistency_check(self, entity_list, entity_type):
+        """Ensures that a list of inputs contains the same entities"""
+        if not entity_list:
+            entity_list.append(entity_type)
+        if entity_type in entity_list:
+            return True
+        return False
+
     def validate(self, _input: str):
         """Functions to validate user inputs"""
-        if self.ip.is_ip_address(_input):
-            return [True, "input: ipv4 address", [option for option in self.ip.osint_options.keys()]]
-        elif self.email.is_valid_email(_input):
-            return [True, "input: email address", [option for option in self.email.osint_options.keys()]]
-        elif self.domain.is_valid_domain(_input):
-            return [True, "input: domain", [option for option in self.domain.osint_options.keys()]]
-        elif self.url.is_url(_input):
-            return [True, "input: url", [option for option in self.url.osint_options.keys()]]
-        elif self.md5.is_md5(_input):
-            return [True, "input: md5", [option for option in self.md5.osint_options.keys()]]
-        elif self.sha256.is_sha256(_input):
-            return [True, "input: sha256", [option for option in self.sha256.osint_options.keys()]]
-        return [False, []]
+        _input = _input.split(",")
+        _list = []
+        output = []
+        for i in _input:
+            if self.ip.is_ip_address(i) and self.consistency_check(_list, "ip"):
+                output.append([True, "input: ipv4 address", [option for option in self.ip.osint_options.keys()]])
+            elif self.email.is_valid_email(i) and self.consistency_check(_list, "email"):
+                output.append([True, "input: email address", [option for option in self.email.osint_options.keys()]])
+            elif self.domain.is_valid_domain(i) and self.consistency_check(_list, "domain"):
+                output.append([True, "input: domain", [option for option in self.domain.osint_options.keys()]])
+            elif self.url.is_url(i) and self.consistency_check(_list, "url"):
+                output.append([True, "input: url", [option for option in self.url.osint_options.keys()]])
+            elif self.md5.is_md5(i) and self.consistency_check(_list, "hash"):
+                output.append([True, "input: md5", [option for option in self.md5.osint_options.keys()]])
+            elif self.sha256.is_sha256(i) and self.consistency_check(_list, "hash"):
+                output.append([True, "input: sha256", [option for option in self.sha256.osint_options.keys()]])
+            else:
+                output.append([False, []])
+        return output
 
     def execute_transform(self, _input: str, transform: str):
         """Function to run osint data mining tasks appropriate to each input"""

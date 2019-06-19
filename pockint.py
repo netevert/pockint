@@ -203,7 +203,7 @@ class Gui(tk.Frame):
         self.validator = InputValidator()
         _input = self.entry.get()
         if _input:
-            validated_input = self.validator.validate(_input)
+            validated_input = self.validator.validate(_input)[-1:][0]
             if validated_input[0]:
                 self.status['text'] = validated_input[1]
                 self.selector['values'] = validated_input[2]
@@ -224,12 +224,13 @@ class Gui(tk.Frame):
     def run_data_mining(self, event=None):
         """Performs the select OSINT data mining operation"""
         self.status['text'] = "running..."
-        _input = self.entry.get()
+        _input = self.entry.get().split(",")
         transform = self.selector.get()
         try:
-            data = self.validator.execute_transform(_input, transform)
-            for item in data:
-                self.treeview.insert(self.getID(_input), "end", values=(transform, item))
+            for i in _input:
+                data = self.validator.execute_transform(i, transform)
+                for item in data:
+                    self.treeview.insert(self.getID(i), "end", values=(transform, item))
             # todo: focus on last treeview output to be able to hit enter and iterate
             # item = self.treeview.insert('', 'end', text=_input, values=(transform, data))
             # self.treeview.focus_set()
