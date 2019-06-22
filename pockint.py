@@ -127,8 +127,8 @@ class Gui(tk.Frame):
 
         # create run menu
         self.run = tk.Menu(self.top, tearoff=False)
-        self.run.add_checkbutton(label="Multi-select", onvalue=True, offvalue=False, variable=self.multi_select, command=self.config_menu)
-        self.run.add_command(label='Run transform', accelerator='Ctrl+R',
+        self.run.add_checkbutton(label="Multi-Select", onvalue=True, offvalue=False, variable=self.multi_select, command=self.config_menu)
+        self.run.add_command(label='Run Transform', accelerator='Ctrl+R',
                               command=self.run_data_mining, compound=tk.LEFT, underline=0)
         self.run.add_separator()
         self.run.add_command(label='Exit', command=self.quit_program,
@@ -147,7 +147,7 @@ class Gui(tk.Frame):
                               compound=tk.LEFT, underline=0)
         self.top.add_cascade(label='?', menu=self.info, underline=0)
 
-        self.run.entryconfig("Run transform", state="disabled")
+        self.run.entryconfig("Run Transform", state="disabled")
 
     def build_interface(self):
         """Builds the gui interface"""
@@ -215,11 +215,11 @@ class Gui(tk.Frame):
     def config_menu(self, event=None):
         """Ensures search menu option is properly enabled and disabled"""
         if self.multi_select.get():
-            self.run.entryconfig("Run transform", state="disabled")
+            self.run.entryconfig("Run Transform", state="disabled")
         elif self.selector.get() == "":
-            self.run.entryconfig("Run transform", state="disabled")
+            self.run.entryconfig("Run Transform", state="disabled")
         else:
-            self.run.entryconfig("Run transform", state="active")
+            self.run.entryconfig("Run Transform", state="active")
 
     def validate_input(self, event=None):
         """Validates and sanitizes user input"""
@@ -236,12 +236,12 @@ class Gui(tk.Frame):
             else:
                 self.selector["values"] = [""]
                 self.selector.set("")
-                self.run.entryconfig("Run transform", state="disabled")
+                self.run.entryconfig("Run Transform", state="disabled")
                 self.status['text'] = "input: invalid"
         elif not _input:
             self.status['text'] = "ready"
             self.selector["values"] = [""]
-            self.run.entryconfig("Run transform", state="disabled")
+            self.run.entryconfig("Run Transform", state="disabled")
             self.selector.current(0)
 
     def run_data_mining(self, event=None):
