@@ -113,9 +113,11 @@ class Gui(tk.Frame):
     def __init__(self, master=None, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
         self.icon = load_icon()
+        self.multi_select = tk.BooleanVar()
         self.build_menu()
         self.build_interface()
         self.id_tracker = dict()
+        self.transforms_tracker = set()
     
     def build_menu(self):
         """Initializes and builds program menu bar"""
@@ -123,7 +125,8 @@ class Gui(tk.Frame):
 
         # create run menu
         self.run = tk.Menu(self.top, tearoff=False)
-        self.run.add_command(label='Search', accelerator='Ctrl+S',
+        self.run.add_checkbutton(label="Multi-select", onvalue=True, offvalue=False, variable=self.multi_select, command=self.config_menu)
+        self.run.add_command(label='Run transform', accelerator='Ctrl+R',
                               command=self.run_data_mining, compound=tk.LEFT, underline=0)
         self.run.add_separator()
         self.run.add_command(label='Exit', command=self.quit_program,
@@ -142,7 +145,7 @@ class Gui(tk.Frame):
                               compound=tk.LEFT, underline=0)
         self.top.add_cascade(label='?', menu=self.info, underline=0)
 
-        self.run.entryconfig("Search", state="disabled")
+        self.run.entryconfig("Run transform", state="disabled")
 
     def build_interface(self):
         """Builds the gui interface"""
@@ -161,7 +164,13 @@ class Gui(tk.Frame):
         # create data mining action selection drop down
         self.selector = ttk.Combobox(labelframe_1, values=[""], state="readonly")
         self.selector.pack(expand=True, fill='x', side="top", padx=2, pady=2)
-        
+
+        #self.checkBox1 = tk.Checkbutton(labelframe_1, variable=None, onvalue=1, offvalue=0, text="Multi-select")
+        #self.checkBox1.pack(expand=False, side="left", padx=2, pady=2, anchor="w")
+
+        #self.entry2 = tk.Entry(labelframe_1)
+        #self.entry2.pack(expand=True, fill='x', side="left", padx=2, pady=2, anchor="w")
+
         # create results frame
         frame_2 = tk.Frame()
         frame_2.pack(expand=True, fill='both', anchor="n")
@@ -191,12 +200,24 @@ class Gui(tk.Frame):
 
         # gui bindings
         self.entry.bind('<Return>', self.validate_input)
+        self.entry.bind('<FocusOut>', self.validate_input)
         self.selector.bind("<<ComboboxSelected>>", self.run_data_mining)
         self.selector.bind("<Return>", self.run_data_mining)
+        self.selector.bind("<ButtonRelease-1>", self.config_menu)
         self.treeview.bind('<ButtonRelease-1>', self.selectItem)
+        self.bind_all('<Control-r>', self.run_data_mining)
 
         # focus on entry widget
         self.entry.focus()
+
+    def config_menu(self, event=None):
+        """Ensures search menu option is properly enabled and disabled"""
+        if self.multi_select.get():
+            self.run.entryconfig("Run transform", state="disabled")
+        elif self.selector.get() == "":
+            self.run.entryconfig("Run transform", state="disabled")
+        else:
+            self.run.entryconfig("Run transform", state="active")
 
     def validate_input(self, event=None):
         """Validates and sanitizes user input"""
@@ -209,36 +230,46 @@ class Gui(tk.Frame):
                 self.selector['values'] = validated_input[2]
                 self.selector.current(0)
                 self.selector.focus()
-                self.run.entryconfig("Search", state="active")
+                self.config_menu()
             else:
                 self.selector["values"] = [""]
                 self.selector.set("")
-                self.run.entryconfig("Search", state="disabled")
+                self.run.entryconfig("Run transform", state="disabled")
                 self.status['text'] = "input: invalid"
         elif not _input:
             self.status['text'] = "ready"
             self.selector["values"] = [""]
-            self.run.entryconfig("Search", state="disabled")
+            self.run.entryconfig("Run transform", state="disabled")
             self.selector.current(0)
 
     def run_data_mining(self, event=None):
         """Performs the select OSINT data mining operation"""
-        self.status['text'] = "running..."
-        _input = self.entry.get().split(",")
-        transform = self.selector.get()
-        try:
-            for i in _input:
-                data = self.validator.execute_transform(i, transform)
-                for item in data:
-                    self.treeview.insert(self.getID(i), "end", values=(transform, item))
-            # todo: focus on last treeview output to be able to hit enter and iterate
-            # item = self.treeview.insert('', 'end', text=_input, values=(transform, data))
-            # self.treeview.focus_set()
-            # self.treeview.selection_set(item)
-            self.entry.focus()
-            self.status['text'] = "ready"
-        except Exception as e:
-            messagebox.showerror("Error", "Error message:" + str(e))
+        if self.multi_select.get():
+            self.transforms_tracker.add(self.selector.get())
+            self.status['text'] = "multi-select: [{}]".format(" - ".join([transform for transform in self.transforms_tracker]))
+        else:
+            self.status['text'] = "running..."
+            _input = self.entry.get().split(",")
+            if _input[0]:
+                transform = self.selector.get()
+                self.transforms_tracker.add(transform)
+                try:
+                    for i in _input:
+                        for transform in self.transforms_tracker:
+                            data = self.validator.execute_transform(i, transform)
+                            for item in data:
+                                self.treeview.insert(self.getID(i), "end", values=(transform, item))
+                    # todo: focus on last treeview output to be able to hit enter and iterate
+                    # item = self.treeview.insert('', 'end', text=_input, values=(transform, data))
+                    # self.treeview.focus_set()
+                    # self.treeview.selection_set(item)
+                    self.entry.focus()
+                    self.status['text'] = "ready"
+                    self.transforms_tracker.clear()
+                except Exception as e:
+                    messagebox.showerror("Error", "Error message:" + str(e))
+            else:
+                self.status['text'] = "no inputs"
     
     def getID(self, item):  
         """Grabs the ID of the queried treeview item"""

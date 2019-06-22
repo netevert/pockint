@@ -8,6 +8,7 @@ import requests
 import socket as sock
 import shodan
 import sqlite3
+import sys
 import tempfile
 from urllib.parse import urlparse
 import validators
@@ -19,7 +20,10 @@ class Database(object):
         """Initialises application database, if app db doesn't exist, it creates one"""
         
         # verify that db folder exists, if not create one
-        self.db_path = os.getenv("LOCALAPPDATA")+ "\\pockint\\"
+        if sys.platform == "win32":
+            self.db_path = os.getenv("LOCALAPPDATA")+ "\\pockint\\"
+        else:
+            self.path_db = os.path.expanduser(os.path.join("~", ".pockint"))
         if not os.path.exists(self.db_path):
             os.makedirs(self.db_path)
             self.create_database()
@@ -654,7 +658,7 @@ def make_vt_api_request(url: str, api_key: str, search_params: dict):
     try:
         params = {"apikey": api_key}
         params.update(search_params)
-        headers = {'User-Agent': 'Pockint v.1.0.0-beta'}
+        headers = {'User-Agent': 'Pockint v.1.0.0'}
         return requests.get(url, params=params, headers=headers)
     except Exception as e:
         return e
