@@ -23,7 +23,7 @@ class Database(object):
         if sys.platform == "win32":
             self.db_path = os.getenv("LOCALAPPDATA")+ "\\pockint\\"
         else:
-            self.path_db = os.path.expanduser(os.path.join("~", ".pockint"))
+            self.db_path = os.path.expanduser(os.path.join("~", ".pockint"))
         if not os.path.exists(self.db_path):
             os.makedirs(self.db_path)
             self.create_database()

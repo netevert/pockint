@@ -5,6 +5,7 @@ import tkinter as tk
 from tkinter import messagebox
 import tkinter.ttk as ttk
 from utils import InputValidator, Database, load_icon, callback
+import sys
 
 __version__ = '1.0.0'
 
@@ -112,7 +113,8 @@ class Gui(tk.Frame):
     """Main program graphical user interface"""
     def __init__(self, master=None, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
-        self.icon = load_icon()
+        if sys.platform == "win32":
+            self.icon = load_icon()
         self.multi_select = tk.BooleanVar()
         self.build_menu()
         self.build_interface()
@@ -296,10 +298,14 @@ class Gui(tk.Frame):
         """Opens a new window providing credits information"""
         # launch window and configure window settings
         self.win_credits = CreditsTool()
-        self.win_credits.title('')
+        if sys.platform == "win32":
+            self.win_credits.title('')
+        else:
+            self.win_credits.title('Credits')
         self.win_credits.geometry('+%d+%d' % (root.winfo_x() +
                                               20, root.winfo_y() + 20))
-        self.win_credits.iconbitmap(self.icon)
+        if sys.platform == "win32":
+            self.win_credits.iconbitmap(self.icon)
         self.win_credits.resizable(width=False, height=False)
         # set focus on window
         self.win_credits.grab_set()
@@ -312,10 +318,11 @@ class Gui(tk.Frame):
         """Opens a new window allowing user to manage api keys"""
         # launch window and configure window settings
         self.api_tool = ApiTool()
-        self.api_tool.title('')
+        self.api_tool.title('Manage APIs')
         self.api_tool.geometry('+%d+%d' % (root.winfo_x() +
                                               20, root.winfo_y() + 20))
-        self.api_tool.iconbitmap(self.icon)
+        if sys.platform == "win32":
+            self.api_tool.iconbitmap(self.icon)
         self.api_tool.resizable(width=False, height=False)
         self.api_tool.protocol('WM_DELETE_WINDOW', self.api_tool.close_window)
         # set focus on window
@@ -336,6 +343,7 @@ if __name__ == '__main__':
     pockint = Gui(root)
     root.config(menu=pockint.top)
     pockint.pack(expand=False)
-    root.iconbitmap(pockint.icon)
+    if sys.platform == "win32":
+        root.iconbitmap(pockint.icon)
     root.protocol('WM_DELETE_WINDOW', pockint.quit_program)
     root.mainloop()
