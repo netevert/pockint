@@ -22,9 +22,9 @@ Why use it? POCKINT is designed to be **simple, portable and powerful**.
 
 :star: **Simple**: There's a plethora of awesome OSINT tools out there. Trouble is they either require analysts to be reasonably comfortable with the command line (think [pOSINT](https://github.com/ecstatic-nobel/pOSINT)) or give you way too many features (think [Maltego](https://www.paterva.com/web7/)). POCKINT focuses on simplicity: _INPUT_ > _RUN TRANSFORM_ > _OUTPUT_  ... rinse and repeat. It's the ideal tool to get results quickly and easily through a simple interface.
 
- :package: **Portable**: Most tools either require installation, a license or configuration. POCKINT is ready to go whenever and wherever. Put it in your jump kit USB, investigation VM or laptop and it will just run.
+:package: **Portable**: Most tools either require installation, a license or configuration. POCKINT is ready to go whenever and wherever. Put it in your jump kit USB, investigation VM or laptop and it will just run.
 
- :rocket: **Powerful**: POCKINT combines cheap OSINT sources (whois/DNS) with the power of specialised [APIs](https://www.theguardian.com/media/pda/2007/dec/14/thenutshellabeginnersguide). From the get go you can use a suite of in-built transforms. Add in a couple of API keys and you can unlock even more specialised data mining capabilities.
+:rocket: **Powerful**: POCKINT combines cheap OSINT sources (whois/DNS) with the power of specialised [APIs](https://www.theguardian.com/media/pda/2007/dec/14/thenutshellabeginnersguide). From the get go you can use a suite of in-built transforms. Add in a couple of API keys and you can unlock even more specialised data mining capabilities.
 
 The latest version is capable of running the following data mining tasks:
 
