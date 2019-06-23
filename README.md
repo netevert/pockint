@@ -20,7 +20,7 @@ You can grab the latest version from the [releases page](https://github.com/nete
 
 Why use it? POCKINT is designed to be **simple, portable and powerful**.
 
- :ok_hand: **Simple**: There's a plethora of awesome OSINT tools out there. Trouble is they either require analysts to be reasonably comfortable with the command line (think [pOSINT](https://github.com/ecstatic-nobel/pOSINT)) or give you way too many features (think [Maltego](https://www.paterva.com/web7/)). POCKINT focuses on simplicity: _INPUT_ > _RUN TRANSFORM_ > _OUTPUT_  ... rinse and repeat. It's the ideal tool to get results quickly and easily through a simple interface.
+:star: **Simple**: There's a plethora of awesome OSINT tools out there. Trouble is they either require analysts to be reasonably comfortable with the command line (think [pOSINT](https://github.com/ecstatic-nobel/pOSINT)) or give you way too many features (think [Maltego](https://www.paterva.com/web7/)). POCKINT focuses on simplicity: _INPUT_ > _RUN TRANSFORM_ > _OUTPUT_  ... rinse and repeat. It's the ideal tool to get results quickly and easily through a simple interface.
 
  :package: **Portable**: Most tools either require installation, a license or configuration. POCKINT is ready to go whenever and wherever. Put it in your jump kit USB, investigation VM or laptop and it will just run.
 
