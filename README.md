@@ -82,6 +82,8 @@ The latest version is capable of running the following data mining tasks:
 | Virustotal| Malicious check      |:heavy_check_mark:|
 | Virustotal| Malware type         |:heavy_check_mark:|
 
+MD5 and SHA256 hashes are searchable
+
 </p>
 </details>
 <details><summary>Emails</summary>
