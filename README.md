@@ -8,13 +8,13 @@
 ![GitHub All Releases](https://img.shields.io/github/downloads/netevert/pockint/total.svg?style=flat-square)
 [![Twitter Follow](https://img.shields.io/twitter/follow/netevert.svg?style=social)](https://twitter.com/netevert)
 
-POCKINT (a.k.a. Pocket Intelligence) is the OSINT swiss army knife for DFIR/OSINT professionals. Designed to be a lightweight and portable GUI program (to be carried within USBs or investigation VMs), it provides users with essential OSINT capabilities in a compact form factor: POCKINT's input box accepts typical indicators (URL, IP, MD5) and gives users the ability to perform basic OSINT data mining tasks in an iterable manner.
+POCKINT (a.k.a. Pocket Intelligence) is the OSINT swiss army knife for DFIR/OSINT professionals. A lightweight and portable GUI program, it provides users with essential OSINT capabilities in a compact form factor: POCKINT's input box accepts typical indicators (URL, IP, MD5) and gives users the ability to perform basic OSINT data mining tasks in an iterable manner.
 
 ![demo](https://github.com/netevert/pockint/blob/master/docs/demo.gif)
 
 ## Installation
 
-You can grab the latest version from the [releases page](https://github.com/netevert/pockint/releases). POCKINT is provided as a single executable that can be stored and run anywhere on computers. POCKINT is available for Windows and Linux platforms.
+You can grab the latest version from the [releases page](https://github.com/netevert/pockint/releases/latest). POCKINT is provided as a single executable that can be stored and run anywhere on computers. POCKINT is available for Windows and Linux platforms.
 
 ## Features
 
