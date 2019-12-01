@@ -15,8 +15,8 @@ class CreditsTool(tk.Toplevel):
     def __init__(self, master=None, *args, **kwargs):
         """Initializes Toplevel object and builds credit interface."""
         super().__init__(master, *args, **kwargs)
-        # hide window in background during drawing and load, to prevent flickering and glitches as per
-        # https://stackoverflow.com/questions/48492273/preloading-windows-to-avoid-tkinter-visual-glitches-during-frame-load
+        # hide window in background during drawing and load, to prevent flickering and glitches during frame load
+        # 
         self.withdraw()
         # build and draw the window
         self.build()
@@ -40,15 +40,17 @@ class CreditsTool(tk.Toplevel):
         self.lbl_author.grid(row=1, column=0, sticky='w', padx=1, pady=1)
         self.lbl_author.bind("<Button-1>", lambda e: callback("https://twitter.com/netevert"))
 
-class ApiTool(tk.Toplevel):
-    """Opens a new window providing users ability to input api keys"""
-
-    def __init__(self, master=None, *args, **kwargs):
-        """Initializes Toplevel object and builds credit interface."""
+class SaveTool(tk.Toplevel):
+    """Opens a window to store investigation data"""
+    def __init__(self, master=None, investigation_id=None, data=None, *args, **kwargs):
+        """Initializes Toplevel object and builds interface"""
         super().__init__(master, *args, **kwargs)
+        # initialize variables
+        self.investigation_id = investigation_id
+        self.data = data
+        # initialize database
         self.db_handler = Database()
-        # hide window in background during drawing and load, to prevent flickering and glitches as per
-        # https://stackoverflow.com/questions/48492273/preloading-windows-to-avoid-tkinter-visual-glitches-during-frame-load
+        # hide window in background during drawing and load, to prevent flickering and glitches during frame load
         self.withdraw()
         # build and draw the window
         self.build()
@@ -56,7 +58,64 @@ class ApiTool(tk.Toplevel):
         self.after(0, self.deiconify)
 
     def build(self):
-        """Initializes and builds application widgets."""
+        """Initializes and builds application widgets"""
+        # create input labelframe
+        labelframe_1 = tk.LabelFrame(self, fg='brown')
+        labelframe_1.pack(side="top", expand='yes', fill='both', padx=2, pady=2, anchor="n")
+
+        # create explanation label
+        self.label = tk.Label(labelframe_1, text='Save As...')
+        self.label.pack(expand=True, fill='x', side="left", padx=2, pady=2)
+
+        # create data input entry widget
+        self.entry = tk.Entry(labelframe_1)
+        self.entry.pack(expand=True, fill='x', side="left", padx=2, pady=2)
+        
+        # create save button
+        self.save_button = tk.Button(labelframe_1, text="Save", command=self.save_data)
+        self.save_button.pack(expand=False, side="left", padx=2, pady=2, anchor="e")
+
+        # create cancel button
+        self.cancel_button = tk.Button(labelframe_1, text="Cancel", command=self.quit_save)
+        self.cancel_button.pack(expand=False, side="left", padx=2, pady=2, anchor="e")
+
+        self.entry.insert(0, self.investigation_id)
+
+    def save_data(self):
+        """Stores investigation data within database"""
+        if self.data:
+            try:
+                self.db_handler.store_investigation(self.investigation_id, self.data)
+                messagebox.showinfo("Success", "Successfully saved investigation")
+                self.quit_save()
+
+            except Exception:
+                messagebox.showerror("Error saving data", "Failed to save data!")
+                self.quit_save()
+        else:
+            messagebox.showinfo("No data", "There is no data to save")
+
+    def quit_save(self):
+        """Quits the save window"""
+        self.db_handler.close_connection()
+        self.destroy()
+
+class ApiTool(tk.Toplevel):
+    """Opens a new window providing users ability to input api keys"""
+
+    def __init__(self, master=None, *args, **kwargs):
+        """Initializes Toplevel object and builds interface"""
+        super().__init__(master, *args, **kwargs)
+        self.db_handler = Database()
+        # hide window in background during drawing and load, to prevent flickering and glitches during frame load
+        self.withdraw()
+        # build and draw the window
+        self.build()
+        # unhide the Toplevel window immediately after draw and load 
+        self.after(0, self.deiconify)
+
+    def build(self):
+        """Initializes and builds application widgets"""
         # create input labelframe
         labelframe_1 = tk.LabelFrame(self, text="api key manager", fg='brown')
         labelframe_1.pack(side="top", expand='yes', fill='both', padx=2, pady=2, anchor="n") 
@@ -120,26 +179,35 @@ class Gui(tk.Frame):
         self.build_interface()
         self.id_tracker = dict()
         self.transforms_tracker = set()
+        self.investigation_id_tracker = ""
     
     def build_menu(self):
         """Initializes and builds program menu bar"""
         self.top = tk.Menu(self)
 
-        # create run menu
-        self.run = tk.Menu(self.top, tearoff=False)
-        self.run.add_checkbutton(label="Multi-Select", onvalue=True, offvalue=False, variable=self.multi_select, command=self.config_menu)
-        self.run.add_command(label='Run Transform', accelerator='Ctrl+R',
-                              command=self.run_data_mining, compound=tk.LEFT, underline=0)
-        self.run.add_separator()
-        self.run.add_command(label='Exit', command=self.quit_program,
+        # create file menu
+        self.file = tk.Menu(self.top, tearoff=False)
+        self.file.add_command(label="Open investigation...", compound=tk.LEFT, underline=0, command=None)
+        self.file.add_command(label="Save investigation...", compound=tk.LEFT, underline=0, command=self.save_investigation)
+        self.file.add_separator()
+        self.file.add_command(label='Exit', command=self.quit_program,
                               underline=0)
-        self.top.add_cascade(label='Run', menu=self.run, underline=0)
+
+        self.top.add_cascade(label="File", menu=self.file, underline=0)
 
         # create edit menu
         self.edit = tk.Menu(self.top, tearoff=False)
         self.edit.add_command(label='API keys', command=self.manage_apis,
                               compound=tk.LEFT, underline=0)
         self.top.add_cascade(label='Edit', menu=self.edit, underline=0)
+
+        # create run menu
+        self.run = tk.Menu(self.top, tearoff=False)
+        self.run.add_checkbutton(label="Multi-Select", onvalue=True, offvalue=False, variable=self.multi_select, command=self.config_menu)
+        self.run.add_command(label='Run Transform', accelerator='Ctrl+R',
+                              command=self.run_data_mining, compound=tk.LEFT, underline=0)
+        
+        self.top.add_cascade(label='Run', menu=self.run, underline=0)
 
         # create about menu
         self.info = tk.Menu(self.top, tearoff=False)
@@ -166,12 +234,6 @@ class Gui(tk.Frame):
         # create data mining action selection drop down
         self.selector = ttk.Combobox(labelframe_1, values=[""], state="readonly")
         self.selector.pack(expand=True, fill='x', side="top", padx=2, pady=2)
-
-        #self.checkBox1 = tk.Checkbutton(labelframe_1, variable=None, onvalue=1, offvalue=0, text="Multi-select")
-        #self.checkBox1.pack(expand=False, side="left", padx=2, pady=2, anchor="w")
-
-        #self.entry2 = tk.Entry(labelframe_1)
-        #self.entry2.pack(expand=True, fill='x', side="left", padx=2, pady=2, anchor="w")
 
         # create results frame
         frame_2 = tk.Frame()
@@ -261,10 +323,6 @@ class Gui(tk.Frame):
                             data = self.validator.execute_transform(i, transform)
                             for item in data:
                                 self.treeview.insert(self.getID(i), "end", values=(transform, item))
-                    # todo: focus on last treeview output to be able to hit enter and iterate
-                    # item = self.treeview.insert('', 'end', text=_input, values=(transform, data))
-                    # self.treeview.focus_set()
-                    # self.treeview.selection_set(item)
                     self.entry.focus()
                     self.status['text'] = "ready"
                     self.transforms_tracker.clear()
@@ -332,6 +390,37 @@ class Gui(tk.Frame):
         # start mainloop
         self.api_tool.mainloop()
 
+    def grab_investigation_data(self):
+        """"Stores investigation data"""
+        data = {}
+        for Parent in self.treeview.get_children():
+            data[self.treeview.item(Parent)["text"]]=[]
+            for child in self.treeview.get_children(Parent):
+                if self.treeview.item(child)["values"] not in data[self.treeview.item(Parent)["text"]]:
+                    data[self.treeview.item(Parent)["text"]].append(self.treeview.item(child)["values"])
+        return data
+
+    def save_investigation(self):
+        """Saves investigation data"""
+        if not self.investigation_id_tracker:
+            self.investigation_id_tracker = datetime.datetime.now().strftime("%Y%m%d%H%M")
+        data = self.grab_investigation_data()
+        
+        self.save = SaveTool(investigation_id=self.investigation_id_tracker, data=data)
+        self.save.title('Save investigation')
+        self.save.geometry('+%d+%d' % (root.winfo_x() +
+                                              20, root.winfo_y() + 20))
+        if sys.platform == "win32":
+            self.save.iconbitmap(self.icon)
+        self.save.resizable(width=False, height=False)
+        self.save.protocol('WM_DELETE_WINDOW', self.save.quit_save)
+        # set focus on window
+        self.save.grab_set()
+        self.save.focus()
+
+        # start mainloop
+        self.save.mainloop()
+        
     @staticmethod
     def quit_program():
         """Quits main program window"""

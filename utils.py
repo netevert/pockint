@@ -2,6 +2,7 @@
 
 import base64
 import dns.resolver
+import json
 import os
 import re
 import requests
@@ -39,6 +40,8 @@ class Database(object):
         try:
             cursor.execute('''CREATE TABLE api_keys(id INTEGER PRIMARY KEY, api_name TEXT,
                         api_key TEXT, status INTEGER)''')
+            cursor.execute('''CREATE TABLE json_data (id INTEGER PRIMARY KEY, 
+            investigation_id TEXT, json TEXT)''')
             init_data = [("virustotal", "", 0), ("shodan", "", 0)]
             cursor.executemany(''' INSERT INTO api_keys(api_name, api_key, status) VALUES(?,?,?)''', init_data)
             db.commit()
@@ -81,6 +84,33 @@ class Database(object):
             return [api[0] for api in self.cursor.fetchall()]
         except sqlite3.Error:
             self.db.rollback()
+
+    def store_investigation(self, investigation_id, data):
+        """Stores investigation data in tab by investigation_id"""
+        data = json.dumps(data)
+        try:
+            self.cursor.execute('''SELECT * FROM json_data WHERE investigation_id=?''', (investigation_id,))
+            if not self.cursor.fetchone():
+                # insert fresh data
+                self.cursor.execute('''INSERT INTO json_data(investigation_id, json) Values (?,?)''', 
+                (investigation_id, data))
+            else:
+                # update data
+                self.cursor.execute('''UPDATE json_data SET json=? WHERE investigation_id=?''',
+                (data, investigation_id))
+            self.db.commit()
+        except sqlite3.Error:
+            self.db.rollback()
+
+    def retrieve_investigation(self, investigation_id):
+        """Retrieves investigation data by investigation_id returning"""
+        try:
+            self.cursor.execute('''''')
+            data = self.cursor.fetchone()[2]
+        except sqlite3.Error:
+            self.db.rollback()
+
+        return json.loads(data)
 
     def close_connection(self):
         """Closes the connection to the local database file"""
