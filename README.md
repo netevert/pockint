@@ -96,13 +96,4 @@ MD5 and SHA256 hashes are searchable
 </p>
 </details>
 
-New APIs and input integrations are constantly being added to the tool. Consult the [roadmap](https://github.com/netevert/pockint/milestones) to check out what's brewing or [propose](https://github.com/netevert/pockint/issues) your own favourite API/input.
-
-## Credits
-
-Credit goes to the following people for their contributions to the project, either as providers of early feedback/ideas or for their awesome help in spreading the word:
-
-* [Olaf Hartong](https://twitter.com/olafhartong)
-* [Uriel](https://github.com/0x557269656C)
-* [Jake Creps](https://twitter.com/jakecreps)
-* [Simon Biles](https://twitter.com/si_biles)
+New APIs and input integrations are in the works, consult the [issues page](https://github.com/netevert/pockint/issues) to check out what's brewing or feel free to propose your own.

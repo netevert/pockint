@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
 import datetime
+from threading import Thread
 import tkinter as tk
 from tkinter import messagebox
 import tkinter.ttk as ttk
 from utils import InputValidator, Database, load_icon, callback
 import sys
 
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 
 class CreditsTool(tk.Toplevel):
     """Opens a new window providing credits"""
@@ -16,7 +17,6 @@ class CreditsTool(tk.Toplevel):
         """Initializes Toplevel object and builds credit interface."""
         super().__init__(master, *args, **kwargs)
         # hide window in background during drawing and load, to prevent flickering and glitches during frame load
-        # 
         self.withdraw()
         # build and draw the window
         self.build()
@@ -85,7 +85,7 @@ class SaveTool(tk.Toplevel):
         """Stores investigation data within database"""
         if self.data:
             try:
-                self.db_handler.store_investigation(self.investigation_id, self.data)
+                self.db_handler.store_investigation(self.entry.get(), self.data)
                 messagebox.showinfo("Success", "Successfully saved investigation")
                 self.quit_save()
 
@@ -97,6 +97,130 @@ class SaveTool(tk.Toplevel):
 
     def quit_save(self):
         """Quits the save window"""
+        self.db_handler.close_connection()
+        self.destroy()
+
+class OpenTool(tk.Toplevel):
+    """Opens a window to retrieve investigation data"""
+    def __init__(self, master=None, *args, **kwargs):
+        """Initializes Toplevel object and builds interface"""
+        super().__init__(master, *args, **kwargs)
+        # initialize variables
+        self.selection = tk.StringVar(self)
+        # initialize database
+        self.db_handler = Database()
+        # hide window in background during drawing and load, to prevent flickering and glitches during frame load
+        self.withdraw()
+        # build and draw the window
+        self.build()
+        # unhide the Toplevel window immediately after draw and load 
+        self.after(0, self.deiconify)
+
+    def build(self):
+        """Initializes and builds application widgets"""
+        # create input labelframe
+        labelframe_1 = tk.LabelFrame(self, fg='brown')
+        labelframe_1.pack(side="top", expand='yes', fill='both', padx=2, pady=2, anchor="n")
+
+        # create explanation label
+        self.label = tk.Label(labelframe_1, text='Load...')
+        self.label.pack(expand=True, fill='x', side="left", padx=2, pady=2)
+
+        # create data input entry widget
+        self.options = tk.OptionMenu(labelframe_1, self.selection, *self.db_handler.retrieve_investigation_ids(),
+        command=self.open_data)
+        self.options.pack(expand=True, fill='x', side="left", padx=2, pady=2)
+        self.selection.set(self.db_handler.retrieve_investigation_ids()[0])
+
+        # create save button
+        self.save_button = tk.Button(labelframe_1, text="Open", command=self.open_data)
+        self.save_button.pack(expand=False, side="left", padx=2, pady=2, anchor="e")
+
+        # create cancel button
+        self.cancel_button = tk.Button(labelframe_1, text="Cancel", command=self.quit_open)
+        self.cancel_button.pack(expand=False, side="left", padx=2, pady=2, anchor="e")
+
+    def open_data(self, value=None):
+        """Retrieves investigation data from database"""
+        pockint.treeview.delete(*pockint.treeview.get_children())
+        pockint.id_tracker = {}
+        if value:
+            investigation_id = value
+        else:
+            investigation_id = self.selection.get()
+        try:
+            iid, data = self.db_handler.open_investigation(investigation_id)
+            for target in data:
+                for transform in data[target]:
+                    pockint.treeview.insert(pockint.getID(target), "end", values=(transform[0], transform[1]))
+            pockint.investigation_id_tracker = iid
+            self.quit_open()
+
+        except Exception as e:
+            print("[*] Error: ", e)
+            self.quit_open()
+
+    def quit_open(self):
+        """Quits the open window"""
+        self.db_handler.close_connection()
+        self.destroy()
+
+class DeleteTool(tk.Toplevel):
+    """Opens a window to retrieve investigation data"""
+    def __init__(self, master=None, *args, **kwargs):
+        """Initializes Toplevel object and builds interface"""
+        super().__init__(master, *args, **kwargs)
+        # initialize variables
+        self.selection = tk.StringVar(self)
+        # initialize database
+        self.db_handler = Database()
+        # hide window in background during drawing and load, to prevent flickering and glitches during frame load
+        self.withdraw()
+        # build and draw the window
+        self.build()
+        # unhide the Toplevel window immediately after draw and load 
+        self.after(0, self.deiconify)
+
+    def build(self):
+        """Initializes and builds application widgets"""
+        # create input labelframe
+        labelframe_1 = tk.LabelFrame(self, fg='brown')
+        labelframe_1.pack(side="top", expand='yes', fill='both', padx=2, pady=2, anchor="n")
+
+        # create explanation label
+        self.label = tk.Label(labelframe_1, text='Delete...')
+        self.label.pack(expand=True, fill='x', side="left", padx=2, pady=2)
+
+        # create data input entry widget
+        self.options = tk.OptionMenu(labelframe_1, self.selection, *self.db_handler.retrieve_investigation_ids(),
+        command=self.delete_data)
+        self.options.pack(expand=True, fill='x', side="left", padx=2, pady=2)
+        self.selection.set(self.db_handler.retrieve_investigation_ids()[0])
+
+        # create save button
+        self.save_button = tk.Button(labelframe_1, text="Delete", command=self.delete_data)
+        self.save_button.pack(expand=False, side="left", padx=2, pady=2, anchor="e")
+
+        # create cancel button
+        self.cancel_button = tk.Button(labelframe_1, text="Cancel", command=self.quit)
+        self.cancel_button.pack(expand=False, side="left", padx=2, pady=2, anchor="e")
+
+    def delete_data(self, value=None):
+        """Deletes investigation data from database"""
+        if value:
+            investigation_id = value
+        else:
+            investigation_id = self.selection.get()
+        try:
+            self.db_handler.delete_investigation(investigation_id)
+            self.quit()
+
+        except Exception as e:
+            print("[*] Error: ", e)
+            self.quit()
+
+    def quit(self):
+        """Quits the open window"""
         self.db_handler.close_connection()
         self.destroy()
 
@@ -187,8 +311,9 @@ class Gui(tk.Frame):
 
         # create file menu
         self.file = tk.Menu(self.top, tearoff=False)
-        self.file.add_command(label="Open investigation...", compound=tk.LEFT, underline=0, command=None)
+        self.file.add_command(label="Load investigation...", compound=tk.LEFT, underline=0, command=self.open_investigation)
         self.file.add_command(label="Save investigation...", compound=tk.LEFT, underline=0, command=self.save_investigation)
+        self.file.add_command(label="Delete investigation...", compound=tk.LEFT, underline=0, command=self.delete_investigation)
         self.file.add_separator()
         self.file.add_command(label='Exit', command=self.quit_program,
                               underline=0)
@@ -197,6 +322,8 @@ class Gui(tk.Frame):
 
         # create edit menu
         self.edit = tk.Menu(self.top, tearoff=False)
+        self.edit.add_command(label="Clear data", compound=tk.LEFT, underline=0, command=self.clear_investigation_data)
+        self.edit.add_separator()
         self.edit.add_command(label='API keys', command=self.manage_apis,
                               compound=tk.LEFT, underline=0)
         self.top.add_cascade(label='Edit', menu=self.edit, underline=0)
@@ -308,6 +435,7 @@ class Gui(tk.Frame):
 
     def run_data_mining(self, event=None):
         """Performs the select OSINT data mining operation"""
+        self.finished = False
         if self.multi_select.get():
             self.transforms_tracker.add(self.selector.get())
             self.status['text'] = "multi-select: [{}]".format(" - ".join([transform for transform in self.transforms_tracker]))
@@ -318,11 +446,10 @@ class Gui(tk.Frame):
                 transform = self.selector.get()
                 self.transforms_tracker.add(transform)
                 try:
-                    for i in _input:
-                        for transform in self.transforms_tracker:
-                            data = self.validator.execute_transform(i, transform)
-                            for item in data:
-                                self.treeview.insert(self.getID(i), "end", values=(transform, item))
+                    t = Thread(target=self.run_transform, args=(_input, self.transforms_tracker,))
+                    t.daemon = True
+                    t.start()
+                    self.check_status()
                     self.entry.focus()
                     self.status['text'] = "ready"
                     self.transforms_tracker.clear()
@@ -330,6 +457,20 @@ class Gui(tk.Frame):
                     messagebox.showerror("Error", "Error message:" + str(e))
             else:
                 self.status['text'] = "no inputs"
+
+    def run_transform(self, _input, transforms):
+        """Run lisf of transforms on input data"""
+        for i in _input:
+            for transform in transforms:
+                data = self.validator.execute_transform(i, transform)
+                for item in data:
+                    self.treeview.insert(self.getID(i), "end", values=(transform, item))
+        self.finished = True
+
+    def check_status(self):
+        """Checks if the transform thread has finished executing"""
+        while self.finished is False:
+            root.update()
     
     def getID(self, item):  
         """Grabs the ID of the queried treeview item"""
@@ -362,6 +503,7 @@ class Gui(tk.Frame):
             self.win_credits.title('Credits')
         self.win_credits.geometry('+%d+%d' % (root.winfo_x() +
                                               20, root.winfo_y() + 20))
+        self.win_credits.geometry("160x100")
         if sys.platform == "win32":
             self.win_credits.iconbitmap(self.icon)
         self.win_credits.resizable(width=False, height=False)
@@ -403,7 +545,7 @@ class Gui(tk.Frame):
     def save_investigation(self):
         """Saves investigation data"""
         if not self.investigation_id_tracker:
-            self.investigation_id_tracker = datetime.datetime.now().strftime("%Y%m%d%H%M")
+            self.investigation_id_tracker = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M")
         data = self.grab_investigation_data()
         
         self.save = SaveTool(investigation_id=self.investigation_id_tracker, data=data)
@@ -421,6 +563,56 @@ class Gui(tk.Frame):
         # start mainloop
         self.save.mainloop()
         
+    def open_investigation(self):
+        """Open investigation data"""
+        db = Database()
+        investigation_ids = db.retrieve_investigation_ids()
+        if not investigation_ids:
+            messagebox.showinfo("No saved investigations", "Please save an investigation before loading data")
+            db.close_connection()
+        if investigation_ids:
+            # clear investigation id
+            self.investigation_id_tracker = ""
+
+            self.open = OpenTool()
+            self.open.title('Open investigation')
+            self.open.geometry('+%d+%d' % (root.winfo_x() +
+                                                  20, root.winfo_y() + 20))
+            if sys.platform == "win32":
+                self.open.iconbitmap(self.icon)
+            self.open.resizable(width=False, height=False)
+            self.open.protocol('WM_DELETE_WINDOW', self.open.quit_open)
+            # set focus on window
+            self.open.grab_set()
+            self.open.focus()
+
+            # start mainloop
+            self.open.mainloop()
+
+    def delete_investigation(self):
+        """Delete investigation data"""
+        self.delete = DeleteTool()
+        self.delete.title('Delete investigation')
+        self.delete.geometry('+%d+%d' % (root.winfo_x() +
+                                              20, root.winfo_y() + 20))
+        if sys.platform == "win32":
+            self.delete.iconbitmap(self.icon)
+        self.delete.resizable(width=False, height=False)
+        self.delete.protocol('WM_DELETE_WINDOW', self.delete.quit)
+        # set focus on window
+        self.delete.grab_set()
+        self.delete.focus()
+
+        # start mainloop
+        self.delete.mainloop()
+
+    def clear_investigation_data(self, event=None):
+        """Clears investigation data from treeview"""
+        self.treeview.delete(*pockint.treeview.get_children())
+        self.id_tracker = {}
+        self.entry.delete(0, "end")
+        self.validate_input()
+
     @staticmethod
     def quit_program():
         """Quits main program window"""

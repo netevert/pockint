@@ -33,6 +33,13 @@ class Database(object):
         self.db = sqlite3.connect(self.db_path + "\\.pockint.db")
         self.cursor = self.db.cursor()
 
+        # create json_data table if not exist (to upgrade old databases)
+        self.cursor.execute("""SELECT name FROM sqlite_master WHERE type='table' AND name='json_data';""")
+        if not self.cursor.fetchone():
+            self.cursor.execute('''CREATE TABLE json_data (id INTEGER PRIMARY KEY, 
+            investigation_id TEXT, json TEXT)''')
+            self.db.commit()
+
     def create_database(self):
         """Creates a new database in AppData/Local"""
         db = sqlite3.connect(self.db_path + "\\.pockint.db")
@@ -40,10 +47,11 @@ class Database(object):
         try:
             cursor.execute('''CREATE TABLE api_keys(id INTEGER PRIMARY KEY, api_name TEXT,
                         api_key TEXT, status INTEGER)''')
-            cursor.execute('''CREATE TABLE json_data (id INTEGER PRIMARY KEY, 
-            investigation_id TEXT, json TEXT)''')
             init_data = [("virustotal", "", 0), ("shodan", "", 0)]
             cursor.executemany(''' INSERT INTO api_keys(api_name, api_key, status) VALUES(?,?,?)''', init_data)
+            db.commit()
+            cursor.execute('''CREATE TABLE json_data (id INTEGER PRIMARY KEY, 
+            investigation_id TEXT, json TEXT)''')
             db.commit()
             db.close()
         except sqlite3.Error:
@@ -102,15 +110,34 @@ class Database(object):
         except sqlite3.Error:
             self.db.rollback()
 
-    def retrieve_investigation(self, investigation_id):
-        """Retrieves investigation data by investigation_id returning"""
+    def delete_investigation(self, investigation_id):
+        """Delete investigation data"""
         try:
-            self.cursor.execute('''''')
-            data = self.cursor.fetchone()[2]
+            self.cursor.execute('''DELETE FROM json_data WHERE investigation_id=?''', (investigation_id,))
+            self.db.commit()
         except sqlite3.Error:
             self.db.rollback()
 
-        return json.loads(data)
+    def open_investigation(self, investigation_id):
+        """Retrieves investigation data by investigation_id returning"""
+        try:
+            self.cursor.execute('''SELECT * FROM json_data WHERE investigation_id=?''', (investigation_id,))
+            response = self.cursor.fetchone()
+            investigation_id = response[1]
+            data = response[2]
+        except sqlite3.Error:
+            self.db.rollback()
+
+        return [investigation_id, json.loads(data)]
+
+    def retrieve_investigation_ids(self):
+        """Retrieves investigation ids from database"""
+        try:
+            self.cursor.execute('''SELECT investigation_id FROM json_data''')
+            data = [row[0] for row in self.cursor.fetchall()]
+            return data
+        except sqlite3.Error:
+            self.db.rollback()
 
     def close_connection(self):
         """Closes the connection to the local database file"""
