@@ -104,7 +104,6 @@ If you like the tool please consider [contributing](https://github.com/netevert/
 The tool received a few "honourable" mentions, including:
 
 - [KitPloit](https://www.kitploit.com/2019/10/pockint-portable-osint-swiss-army-knife.html)
-- [uedbox.com](https://www.uedbox.com/post/59451/)
 - [kalilinuxtutorials.com](https://kalilinuxtutorials.com/pockint-portable-osint-swiss-army-knife-dfir-osint/)
 - [hacking.land](https://www.hacking.land/2019/10/pockint-portable-osint-swiss-army-knife.html)
 - [awesomeopensource.com](https://awesomeopensource.com/project/netevert/pockint)
