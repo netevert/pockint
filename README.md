@@ -97,3 +97,15 @@ MD5 and SHA256 hashes are searchable
 </details>
 
 New APIs and input integrations are in the works, consult the [issues page](https://github.com/netevert/pockint/issues) to check out what's brewing or feel free to propose your own.
+
+Like it?
+=========
+If you like the tool please consider [contributing](https://github.com/netevert/pockint/blob/master/CONTRIBUTING.md).
+
+The tool received a few "honourable" mentions, including:
+
+- [KitPloit](https://www.kitploit.com/2019/10/pockint-portable-osint-swiss-army-knife.html)
+- [uedbox.com](https://www.uedbox.com/post/59451/)
+- [kalilinuxtutorials.com](https://kalilinuxtutorials.com/pockint-portable-osint-swiss-army-knife-dfir-osint/)
+- [hacking.land](https://www.hacking.land/2019/10/pockint-portable-osint-swiss-army-knife.html)
+- [awesomeopensource.com](https://awesomeopensource.com/project/netevert/pockint)
