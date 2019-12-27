@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- Subdomain discovery transform using [crt.sh](https://crt.sh/) api
+
 ## [1.1.0] - 2019-12-08
 
 ### Added

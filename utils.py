@@ -531,6 +531,7 @@ class Domain(object):
             "dns: mx lookup" : self.to_mx_records,
             "dns: txt lookup": self.to_txt_records,
             "dns: ns lookup" : self.to_ns_records,
+            "crt.sh: subdomains" : self.domain_to_subdomains
         }
         self.api_db = Database()
         shodan_api_key = self.api_db.get_api_key("shodan")
@@ -635,6 +636,17 @@ class Domain(object):
                 return ["no data available"]
         except Exception as e:
             return ["virustotal api error: " + e]
+
+    def domain_to_subdomains(self, domain: str):
+        """Discovers subdomains from domain using certificate transparency logs on crt.sh"""
+        try:
+            req = requests.get("https://crt.sh/?q=%.{d}&output=json".format(d=domain))
+            if req.status_code == 200:
+                return list({value['name_value'] for (key,value) in enumerate(req.json())})
+            else: 
+                return ["no data returned from crt.sh"]
+        except Exception as e:
+            return ["transform failed:" + e]
 
 
 class InputValidator(object):

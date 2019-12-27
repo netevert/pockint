@@ -30,15 +30,16 @@ The latest version is capable of running the following data mining tasks:
 <details><summary>Domains</summary>
 <p>
 
-|Source     |Transform          |API key needed?   |
-| --------- | ----------------- | ---------------- |
-| DNS       | IP lookup         |:x:               |
-| DNS       | MX lookup         |:x:               |
-| DNS       | NS lookup         |:x:               |
-| DNS       | TXT lookup        |:x:               |
-| Virustotal| Downloaded samples|:heavy_check_mark:|
-| Virustotal| Detected URLs     |:heavy_check_mark:|
-| Virustotal| Subdomains        |:heavy_check_mark:|
+|Source                         |Transform          |API key needed?   |
+| ----------------------------- | ----------------- | ---------------- |
+| DNS                           | IP lookup         |:x:               |
+| DNS                           | MX lookup         |:x:               |
+| DNS                           | NS lookup         |:x:               |
+| DNS                           | TXT lookup        |:x:               |
+| [crt.sh](https://crt.sh/)     | subdomains        |:x:               |
+| Virustotal                    | Downloaded samples|:heavy_check_mark:|
+| Virustotal                    | Detected URLs     |:heavy_check_mark:|
+| Virustotal                    | Subdomains        |:heavy_check_mark:|
 
 </p>
 </details>
