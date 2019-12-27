@@ -11,3 +11,4 @@ dist
 *.spec
 docs/Thumbs.db
 venv
+version.txt
