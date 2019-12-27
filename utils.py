@@ -14,6 +14,7 @@ import tempfile
 from urllib.parse import urlparse
 import validators
 import webbrowser
+import whois
 
 class Database(object):
     """Local sqlite database handler class"""
@@ -529,8 +530,18 @@ class Domain(object):
         self.osint_options = {
             "dns: ip lookup" : self.to_a_record,
             "dns: mx lookup" : self.to_mx_records,
-            "dns: txt lookup": self.to_txt_records,
             "dns: ns lookup" : self.to_ns_records,
+            "dns: txt lookup": self.to_txt_records,
+            "whois: emails": self.domain_to_whois_emails,
+            "whois: location": self.domain_to_whois_location,
+            "whois: creation": self.domain_to_whois_creation_date,
+            "whois: registrar": self.domain_to_whois_registrar,
+            "whois: expiration": self.domain_to_whois_expiration_date,
+            "whois: dnssec status": self.domain_to_whois_dnssec_status,
+            "whois: registrant org": self.domain_to_whois_registrant_org,
+            "whois: registrant name": self.domain_to_whois_registrant_name,
+            "whois: registrant address": self.domain_to_whois_registrant_address,
+            "whois: registrant zipcode": self.domain_to_whois_registrant_zipcode,
             "crt.sh: subdomains" : self.domain_to_subdomains
         }
         self.api_db = Database()
@@ -645,6 +656,118 @@ class Domain(object):
                 return list({value['name_value'] for (key,value) in enumerate(req.json())})
             else: 
                 return ["no data returned from crt.sh"]
+        except Exception as e:
+            return ["transform failed:" + e]
+
+    def domain_to_whois_expiration_date(self, domain: str):
+        """Queries whois record to find domain expiration date"""
+        try:
+            date = str(whois.whois(domain).expiration_date)
+            if date:
+                return [date]
+            else:
+                return ["no expiration date returned from whois"]
+        except Exception as e:
+            return ["transform failed:" + e]
+
+    def domain_to_whois_creation_date(self, domain: str):
+        """Queries whois record to find domain creation date"""
+        try:
+            date = str(whois.whois(domain).creation_date)
+            if date:
+                return [date]
+            else:
+                return ["no creation date returned from whois"]
+        except Exception as e:
+            return ["transform failed:" + e]
+
+    def domain_to_whois_emails(self, domain: str):
+        """Queries whois record to find email data"""
+        try:
+            data = str(whois.whois(domain).emails)
+            if data:
+                return [data]
+            else:
+                return ["no email data returned from whois"]
+        except Exception as e:
+            return ["transform failed:" + e]
+    
+    def domain_to_whois_registrar(self, domain: str):
+        """Queries whois record to find domain registrar data"""
+        try:
+            data = str(whois.whois(domain).registrar)
+            if data:
+                return [data]
+            else:
+                return ["no registrar data returned from whois"]
+        except Exception as e:
+            return ["transform failed:" + e]
+    
+    def domain_to_whois_location(self, domain: str):
+        """Queries whois record to find domain location data"""
+        try:
+            data = []
+            data.append(str(whois.whois(domain).state))
+            data.append(str(whois.whois(domain).country))
+            if data:
+                return [" ".join(data)]
+            else:
+                return ["no location data returned from whois"]
+        except Exception as e:
+            return ["transform failed:" + e]
+    
+    def domain_to_whois_registrant_org(self, domain: str):
+        """Queries whois record to find domain registrant org"""
+        try:
+            data = str(whois.whois(domain).org)
+            if data:
+                return [data]
+            else:
+                return ["no registrant org data returned from whois"]
+        except Exception as e:
+            return ["transform failed:" + e]
+
+    def domain_to_whois_registrant_name(self, domain: str):
+        """Queries whois record to find domain registrant name"""
+        try:
+            data = str(whois.whois(domain).name)
+            if data:
+                return [data]
+            else:
+                return ["no registrant name returned from whois"]
+        except Exception as e:
+            return ["transform failed:" + e]
+
+    def domain_to_whois_registrant_address(self, domain: str):
+        """Queries whois record to find domain registrant address"""
+        try:
+            data = str(whois.whois(domain).address)
+            if data:
+                return [data]
+            else:
+                return ["no registrant address returned from whois"]
+        except Exception as e:
+            return ["transform failed:" + e]
+
+    def domain_to_whois_registrant_zipcode(self, domain: str):
+        """Queries whois record to find domain registrant zipcode"""
+        try:
+            data = str(whois.whois(domain).zipcode)
+            if data:
+                return [data]
+            else:
+                return ["no registrant zipcode returned from whois"]
+        except Exception as e:
+            return ["transform failed:" + e]
+
+    def domain_to_whois_dnssec_status(self, domain: str):
+        """Queries whois record to find domain dnssec status"""
+        try:
+            data = str(whois.whois(domain).dnssec)
+            if data:
+                return [data]
+            else:
+                return ["no dnssec status data returned from whois"]
         except Exception as e:
             return ["transform failed:" + e]
 

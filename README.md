@@ -30,16 +30,26 @@ The latest version is capable of running the following data mining tasks:
 <details><summary>Domains</summary>
 <p>
 
-|Source                         |Transform          |API key needed?   |
-| ----------------------------- | ----------------- | ---------------- |
-| DNS                           | IP lookup         |:x:               |
-| DNS                           | MX lookup         |:x:               |
-| DNS                           | NS lookup         |:x:               |
-| DNS                           | TXT lookup        |:x:               |
-| [crt.sh](https://crt.sh/)     | subdomains        |:x:               |
-| Virustotal                    | Downloaded samples|:heavy_check_mark:|
-| Virustotal                    | Detected URLs     |:heavy_check_mark:|
-| Virustotal                    | Subdomains        |:heavy_check_mark:|
+|Source                         |Transform               |API key needed?   |
+| ----------------------------- | ---------------------- | ---------------- |
+| DNS                           | IP lookup              |:x:               |
+| DNS                           | MX lookup              |:x:               |
+| DNS                           | NS lookup              |:x:               |
+| DNS                           | TXT lookup             |:x:               |
+| WHOIS                         | Domain dnssec status   |:x:               |
+| WHOIS                         | Domain creation        |:x:               |
+| WHOIS                         | Domain expiration      |:x:               |
+| WHOIS                         | Domain emails          |:x:               |
+| WHOIS                         | Domain registrar       |:x:               |
+| WHOIS                         | Registrant location    |:x:               |
+| WHOIS                         | Registrant org         |:x:               |
+| WHOIS                         | Registrant name        |:x:               |
+| WHOIS                         | Registrant address     |:x:               |
+| WHOIS                         | Registrant zipcode     |:x:               |
+| [crt.sh](https://crt.sh/)     | Subdomains             |:x:               |
+| Virustotal                    | Downloaded samples     |:heavy_check_mark:|
+| Virustotal                    | Detected URLs          |:heavy_check_mark:|
+| Virustotal                    | Subdomains             |:heavy_check_mark:|
 
 </p>
 </details>
@@ -109,4 +119,4 @@ The tool received a few "honourable" mentions, including:
 - [hacking.land](https://www.hacking.land/2019/10/pockint-portable-osint-swiss-army-knife.html)
 - [awesomeopensource.com](https://awesomeopensource.com/project/netevert/pockint)
 
-**Please note:** There have been a small number of reports indicating that pockint triggers false positives on antivirus protected systems (to date [Avast, AVG](https://github.com/netevert/pockint/issues/22) and [Norton](https://twitter.com/ChiefCovfefe/status/1204807996028657664)). The issue [seems to be caused by pyinstaller](https://stackoverflow.com/questions/43777106/program-made-with-pyinstaller-now-seen-as-a-trojan-horse-by-avg), the [python package](https://www.pyinstaller.org/) used to freeze and distribute pockint. If pockint triggers a false positive on your system please submit an issue and the author will submit a false positive report to the concerned antivirus provider.
+**Please note:** There have been a small number of reports indicating that pockint triggers false positives on antivirus protected systems (to date [Avast, AVG](https://github.com/netevert/pockint/issues/22) and [Norton](https://twitter.com/ChiefCovfefe/status/1204807996028657664)). The issue [seems to be caused by pyinstaller](https://stackoverflow.com/questions/43777106/program-made-with-pyinstaller-now-seen-as-a-trojan-horse-by-avg), the [python package](https://www.pyinstaller.org/) used to freeze and distribute pockint. If pockint triggers your antivirus please submit an issue and the author will submit a false positive report to the concerned antivirus provider.
