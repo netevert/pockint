@@ -144,6 +144,7 @@ class Database(object):
         """Closes the connection to the local database file"""
         self.db.close()
 
+
 class Sha256Hash(object):
     """Md5 hash handler class"""
     def __init__(self):
@@ -176,7 +177,7 @@ class Sha256Hash(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["virustotal api error: ", e]
+            return e
 
     def virustotal_malware_type(self, _hash:str):
         """Checks virustotal to return malware types detected by scans"""
@@ -195,7 +196,8 @@ class Sha256Hash(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["virustotal api error: ", e]
+            return e
+
 
 class Md5Hash(object):
     """Md5 hash handler class"""
@@ -229,7 +231,7 @@ class Md5Hash(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["virustotal api error: ", e]
+            return e
 
     def virustotal_malware_type(self, _hash:str):
         """Checks virustotal to return malware types detected by scans"""
@@ -248,7 +250,7 @@ class Md5Hash(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["virustotal api error: ", e]
+            return e
 
 
 class Url(object):
@@ -285,7 +287,7 @@ class Url(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["virustotal api error: ", e]
+            return e
 
     def reported_detections(self, url: str):
         """Checks virustotal to determine which sites are reporting the url"""
@@ -305,14 +307,14 @@ class Url(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["virustotal api error: ", e] # todo: change to return ["error: " + e]
+            return e
 
     def url_to_hostname(self, url: str):
         """Extracts hostname from url"""
         try:
             return [urlparse(url).netloc]
         except Exception as e:
-            return ["error: " + e]
+            return e
 
 
 class IPAdress(object):
@@ -358,6 +360,8 @@ class IPAdress(object):
         except Exception as e:
             if "host not found" in str(e):
                 return ["host not found, PTR record likely missing"]
+            else:
+                return e
     
     def ip_to_asn(self):
         pass
@@ -371,7 +375,7 @@ class IPAdress(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["shodan api error: ", e]
+            return e
 
     def ip_to_shodan_country_name(self, ip:str):
         """Searches shodan to determine the target ip's location"""
@@ -382,7 +386,7 @@ class IPAdress(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["shodan api error: ", e]
+            return e
 
     def ip_to_shodan_coordinates(self, ip:str):
         """Searches shodan to determine the target ip's location co-ordinates"""
@@ -393,7 +397,7 @@ class IPAdress(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["shodan api error: ", e]
+            return e
 
     def ip_to_shodan_cves(self, ip:str):
         """Searches shodan to determine if the ip is vulnerable to CVE's"""
@@ -404,7 +408,7 @@ class IPAdress(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["shodan api error: ", e]
+            return e
     
     def ip_to_shodan_isp(self, ip:str):
         """Searches shodan to determine the ip's ISP"""
@@ -415,7 +419,7 @@ class IPAdress(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["shodan api error: ", e]
+            return e
 
     def ip_to_shodan_city(self, ip:str):
         """Searches shodan to determine the ip's ISP"""
@@ -426,7 +430,7 @@ class IPAdress(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["shodan api error: ", e]
+            return e
 
     def ip_to_shodan_asn(self, ip:str):
         """Searches shodan to determine the ip's ASN"""
@@ -437,7 +441,7 @@ class IPAdress(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["shodan api error: ", e]
+            return e
 
     def ip_to_vt_network_report(self, ip:str):
         """Searches virustotal to return an ip network report"""
@@ -458,7 +462,7 @@ class IPAdress(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["virustotal api error: ", e]
+            return e
 
     def ip_to_vt_communicating_samples(self, ip:str):
         """Searches virustotal to search for detected communicating samples"""
@@ -472,7 +476,7 @@ class IPAdress(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["virustotal api error: ", e]
+            return e
     
     def ip_to_vt_downloaded_samples(self, ip:str):
         """Searches virustotal to search for detected communicating samples"""
@@ -486,7 +490,7 @@ class IPAdress(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["virustotal api error: ", e]
+            return e
     
     def ip_to_vt_detected_urls(self, ip:str):
         """Searches virustotal to search for detected communicating samples"""
@@ -500,7 +504,7 @@ class IPAdress(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["virustotal api error: ", e]  # todo: return ["virustotal api error: " + e]
+            return e
 
 
 class EmailAddress(object):
@@ -568,28 +572,28 @@ class Domain(object):
         try:
             return [sock.gethostbyname(domain)]
         except Exception as e:
-            raise e
+            return e
 
     def to_mx_records(self, domain: str):
         """Returns dns mx record for domain"""
         try:
             return [x.exchange for x in dns.resolver.query(domain, 'MX')]
         except Exception as e:
-            raise e  # todo: return ["virustotal api error: " + e]
+            return e
 
     def to_txt_records(self, domain: str):
         """Returns dns txt record for domain"""
         try:
             return [x.to_text() for x in dns.resolver.query(domain, 'TXT')]
         except Exception as e:
-            raise e
+            return e
 
     def to_ns_records(self, domain: str):
         """Returns ns record for domain"""
         try:
             return [x.to_text() for x in dns.resolver.query(domain, 'NS')]
         except Exception as e:
-            raise e
+            return e
 
     def to_shodan_hostnames(self, domain: str):
         """Searches shodan to discover hostnames associated with the domain"""
@@ -604,7 +608,7 @@ class Domain(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["shodan api error: " + e]
+            return e
 
     def domain_to_vt_detected_urls(self, domain:str):
         """Searches virustotal to search for detected communicating samples"""
@@ -618,7 +622,7 @@ class Domain(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["virustotal api error: " + e]
+            return e
 
     def domain_to_vt_downloaded_samples(self, domain:str):
         """Searches virustotal to search for detected communicating samples"""
@@ -632,7 +636,7 @@ class Domain(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["virustotal api error: " + e]
+            return e
 
     def domain_to_vt_subdomains(self, domain: str):
         """Searches virustotal for subdomains"""
@@ -646,7 +650,7 @@ class Domain(object):
             else:
                 return ["no data available"]
         except Exception as e:
-            return ["virustotal api error: " + e]
+            return e
 
     def domain_to_subdomains(self, domain: str):
         """Discovers subdomains from domain using certificate transparency logs on crt.sh"""
@@ -657,7 +661,7 @@ class Domain(object):
             else: 
                 return ["no data returned from crt.sh"]
         except Exception as e:
-            return ["transform failed:" + e]
+            return e
 
     def domain_to_whois_expiration_date(self, domain: str):
         """Queries whois record to find domain expiration date"""
@@ -668,7 +672,7 @@ class Domain(object):
             else:
                 return ["no expiration date returned from whois"]
         except Exception as e:
-            return ["transform failed:" + e]
+            return e
 
     def domain_to_whois_creation_date(self, domain: str):
         """Queries whois record to find domain creation date"""
@@ -679,7 +683,7 @@ class Domain(object):
             else:
                 return ["no creation date returned from whois"]
         except Exception as e:
-            return ["transform failed:" + e]
+            return e
 
     def domain_to_whois_emails(self, domain: str):
         """Queries whois record to find email data"""
@@ -690,7 +694,7 @@ class Domain(object):
             else:
                 return ["no email data returned from whois"]
         except Exception as e:
-            return ["transform failed:" + e]
+            return e
     
     def domain_to_whois_registrar(self, domain: str):
         """Queries whois record to find domain registrar data"""
@@ -701,7 +705,7 @@ class Domain(object):
             else:
                 return ["no registrar data returned from whois"]
         except Exception as e:
-            return ["transform failed:" + e]
+            return e
     
     def domain_to_whois_location(self, domain: str):
         """Queries whois record to find domain location data"""
@@ -709,12 +713,12 @@ class Domain(object):
             data = []
             data.append(str(whois.whois(domain).state))
             data.append(str(whois.whois(domain).country))
-            if data:
-                return [" ".join(data)]
+            if data[0] == "None" and data[1] == "None":
+                return ["None"]
             else:
-                return ["no location data returned from whois"]
+                return [" ".join(data)]
         except Exception as e:
-            return ["transform failed:" + e]
+            return e
     
     def domain_to_whois_registrant_org(self, domain: str):
         """Queries whois record to find domain registrant org"""
@@ -725,7 +729,7 @@ class Domain(object):
             else:
                 return ["no registrant org data returned from whois"]
         except Exception as e:
-            return ["transform failed:" + e]
+            return e
 
     def domain_to_whois_registrant_name(self, domain: str):
         """Queries whois record to find domain registrant name"""
@@ -736,7 +740,7 @@ class Domain(object):
             else:
                 return ["no registrant name returned from whois"]
         except Exception as e:
-            return ["transform failed:" + e]
+            return e
 
     def domain_to_whois_registrant_address(self, domain: str):
         """Queries whois record to find domain registrant address"""
@@ -747,7 +751,7 @@ class Domain(object):
             else:
                 return ["no registrant address returned from whois"]
         except Exception as e:
-            return ["transform failed:" + e]
+            return e
 
     def domain_to_whois_registrant_zipcode(self, domain: str):
         """Queries whois record to find domain registrant zipcode"""
@@ -758,7 +762,7 @@ class Domain(object):
             else:
                 return ["no registrant zipcode returned from whois"]
         except Exception as e:
-            return ["transform failed:" + e]
+            return e
 
     def domain_to_whois_dnssec_status(self, domain: str):
         """Queries whois record to find domain dnssec status"""
@@ -769,7 +773,7 @@ class Domain(object):
             else:
                 return ["no dnssec status data returned from whois"]
         except Exception as e:
-            return ["transform failed:" + e]
+            return e
 
 
 class InputValidator(object):

@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Subdomain discovery transform using [crt.sh](https://crt.sh/) api
 - Whois data mining integration
 
+### Fixed
+
+- Transform error handling
+
 ## [1.1.0] - 2019-12-08
 
 ### Added

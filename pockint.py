@@ -460,12 +460,19 @@ class Gui(tk.Frame):
 
     def run_transform(self, _input, transforms):
         """Run lisf of transforms on input data"""
-        for i in _input:
-            for transform in transforms:
-                data = self.validator.execute_transform(i, transform)
-                for item in data:
-                    self.treeview.insert(self.getID(i), "end", values=(transform, item))
-        self.finished = True
+        transform_executed = str
+        try:
+            for i in _input:
+                for transform in transforms:
+                    transform_executed = transform
+                    data = self.validator.execute_transform(i, transform)
+                    for item in data:
+                        self.treeview.insert(self.getID(i), "end", values=(transform, item))
+            self.finished = True
+        except Exception as e:
+            self.finished = True
+            messagebox.showerror("Error", 
+            "Error during transform [{}] \nError message: {}".format(transform_executed, str(e)))
 
     def check_status(self):
         """Checks if the transform thread has finished executing"""
