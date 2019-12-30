@@ -471,6 +471,7 @@ class Gui(tk.Frame):
             self.finished = True
         except Exception as e:
             self.finished = True
+            self.status['text'] = "transform failed"
             messagebox.showerror("Error", 
             "Error during transform [{}] \nError message: {}".format(transform_executed, str(e)))
 
