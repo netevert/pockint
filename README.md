@@ -30,69 +30,69 @@ The latest version is capable of running the following data mining tasks:
 <details><summary>Domains</summary>
 <p>
 
-|Source                         |Transform               |API key needed?   |
-| ----------------------------- | ---------------------- | ---------------- |
-| DNS                           | IP lookup              |:x:               |
-| DNS                           | MX lookup              |:x:               |
-| DNS                           | NS lookup              |:x:               |
-| DNS                           | TXT lookup             |:x:               |
-| WHOIS                         | Domain dnssec status   |:x:               |
-| WHOIS                         | Domain creation        |:x:               |
-| WHOIS                         | Domain expiration      |:x:               |
-| WHOIS                         | Domain emails          |:x:               |
-| WHOIS                         | Domain registrar       |:x:               |
-| WHOIS                         | Registrant location    |:x:               |
-| WHOIS                         | Registrant org         |:x:               |
-| WHOIS                         | Registrant name        |:x:               |
-| WHOIS                         | Registrant address     |:x:               |
-| WHOIS                         | Registrant zipcode     |:x:               |
-| [crt.sh](https://crt.sh/)     | Subdomains             |:x:               |
-| Virustotal                    | Downloaded samples     |:heavy_check_mark:|
-| Virustotal                    | Detected URLs          |:heavy_check_mark:|
-| Virustotal                    | Subdomains             |:heavy_check_mark:|
+|Source                                     |Transform               |API key needed?   |
+| ----------------------------------------- | ---------------------- | ---------------- |
+| DNS                                       | IP lookup              |:x:               |
+| DNS                                       | MX lookup              |:x:               |
+| DNS                                       | NS lookup              |:x:               |
+| DNS                                       | TXT lookup             |:x:               |
+| WHOIS                                     | Domain dnssec status   |:x:               |
+| WHOIS                                     | Domain creation        |:x:               |
+| WHOIS                                     | Domain expiration      |:x:               |
+| WHOIS                                     | Domain emails          |:x:               |
+| WHOIS                                     | Domain registrar       |:x:               |
+| WHOIS                                     | Registrant location    |:x:               |
+| WHOIS                                     | Registrant org         |:x:               |
+| WHOIS                                     | Registrant name        |:x:               |
+| WHOIS                                     | Registrant address     |:x:               |
+| WHOIS                                     | Registrant zipcode     |:x:               |
+| [crt.sh](https://crt.sh/)                 | Subdomains             |:x:               |
+| [Virustotal](https://www.virustotal.com)  | Downloaded samples     |:heavy_check_mark:|
+| [Virustotal](https://www.virustotal.com)  | Detected URLs          |:heavy_check_mark:|
+| [Virustotal](https://www.virustotal.com)  | Subdomains             |:heavy_check_mark:|
 
 </p>
 </details>
 <details><summary>IPv4 Adresses</summary>
 <p>
 
-|Source     |Transform             |API key needed?   |
-| --------- | -------------------- | ---------------- |
-| DNS       | Reverse lookup       |:x:               |
-| Shodan    | Ports                |:heavy_check_mark:|
-| Shodan    | Geolocate            |:heavy_check_mark:|
-| Shodan    | Coordinates          |:heavy_check_mark:|
-| Shodan    | CVEs                 |:heavy_check_mark:|
-| Shodan    | ISP                  |:heavy_check_mark:|
-| Shodan    | City                 |:heavy_check_mark:|
-| Shodan    | ASN                  |:heavy_check_mark:|
-| Virustotal| Network report       |:heavy_check_mark:|
-| Virustotal| Communicating samples|:heavy_check_mark:|
-| Virustotal| Downloaded samples   |:heavy_check_mark:|
-| Virustotal| Detected URLs        |:heavy_check_mark:|
+|Source                                     |Transform             |API key needed?   |
+| ----------------------------------------- | -------------------- | ---------------- |
+| DNS                                       | Reverse lookup       |:x:               |
+| [Shodan](https://www.shodan.io/)          | Ports                |:heavy_check_mark:|
+| [Shodan](https://www.shodan.io/)          | Geolocate            |:heavy_check_mark:|
+| [Shodan](https://www.shodan.io/)          | Coordinates          |:heavy_check_mark:|
+| [Shodan](https://www.shodan.io/)          | CVEs                 |:heavy_check_mark:|
+| [Shodan](https://www.shodan.io/)          | ISP                  |:heavy_check_mark:|
+| [Shodan](https://www.shodan.io/)          | City                 |:heavy_check_mark:|
+| [Shodan](https://www.shodan.io/)          | ASN                  |:heavy_check_mark:|
+| [Virustotal](https://www.virustotal.com)  | Network report       |:heavy_check_mark:|
+| [Virustotal](https://www.virustotal.com)  | Communicating samples|:heavy_check_mark:|
+| [Virustotal](https://www.virustotal.com)  | Downloaded samples   |:heavy_check_mark:|
+| [Virustotal](https://www.virustotal.com)  | Detected URLs        |:heavy_check_mark:|
+| [OTX](https://otx.alienvault.com/)        | Malware type         |:heavy_check_mark:|
+| [OTX](https://otx.alienvault.com/)        | Malware hash         |:heavy_check_mark:|
 
 </p>
 </details>
 <details><summary>Urls</summary>
 <p>
 
-|Source     |Transform             |API key needed?   |
-| --------- | -------------------- | ---------------- |
-| DNS       | Extract hostname     |:x:               |
-| Virustotal| Malicious check      |:heavy_check_mark:|
-| Virustotal| Reported detections  |:heavy_check_mark:|
+|Source                                     |Transform             |API key needed?   |
+| ----------------------------------------- | -------------------- | ---------------- |
+| DNS                                       | Extract hostname     |:x:               |
+| [Virustotal](https://www.virustotal.com)  | Malicious check      |:heavy_check_mark:|
+| [Virustotal](https://www.virustotal.com)  | Reported detections  |:heavy_check_mark:|
 
 </p>
 </details>
-<details><summary>Hashes</summary>
+<details><summary>MD5 and SHA256 Hashes</summary>
 <p>
  
-|Source     |Transform             |API key needed?   |
-| --------- | -------------------- | ---------------- |
-| Virustotal| Malicious check      |:heavy_check_mark:|
-| Virustotal| Malware type         |:heavy_check_mark:|
-
-MD5 and SHA256 hashes are searchable
+|Source                                      |Transform             |API key needed?   |
+| ------------------------------------------ | -------------------- | ---------------- |
+|  [Virustotal](https://www.virustotal.com)  | Malicious check      |:heavy_check_mark:|
+|  [Virustotal](https://www.virustotal.com)  | Malware type         |:heavy_check_mark:|
 
 </p>
 </details>

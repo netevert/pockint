@@ -50,7 +50,7 @@ class Database(object):
         try:
             cursor.execute('''CREATE TABLE api_keys(id INTEGER PRIMARY KEY, api_name TEXT,
                         api_key TEXT, status INTEGER)''')
-            init_data = [("virustotal", "", 0), ("shodan", "", 0), ("OTX DirectConnect API", "", 0)]
+            init_data = [("virustotal", "", 0), ("shodan", "", 0), ("otx", "", 0)]
             cursor.executemany(''' INSERT INTO api_keys(api_name, api_key, status) VALUES(?,?,?)''', init_data)
             db.commit()
             cursor.execute('''CREATE TABLE json_data (id INTEGER PRIMARY KEY, 
@@ -346,6 +346,12 @@ class IPAdress(object):
                 "virustotal: downloaded samples": self.ip_to_vt_downloaded_samples,
                 "virustotal: detected urls": self.ip_to_vt_detected_urls
             })
+        self.otx_api_key = self.api_db.get_api_key("otx")
+        if self.otx_api_key:
+            self.osint_options.update({
+                "otx: malware type": self.ip_to_otx_malware_types,
+                "otx: malware hash": self.ip_to_otx_malware_hash
+            })
 
     def is_ip_address(self, _input: str):
         """Validates if _input is ip address"""
@@ -507,7 +513,32 @@ class IPAdress(object):
                 return ["no data available"]
         except Exception as e:
             return e
-
+    
+    def ip_to_otx_malware_types(self, ip:str):
+        """Searches OTX DirectConnect for malware type data for the given ip"""
+        try:
+            otx = connect_to_otx_api(self.otx_api_key)
+            results = otx.get_indicator_details_by_section(IndicatorTypes.IPv4, ip, 'malware')
+            detections = results.get("data")[0].get("detections", None)
+            if detections:
+                return ["[{}] {}".format(key, detections[key]) for key in detections if detections[key] != None]
+            else:
+                return ["ip clean"]
+        except Exception as e:
+            return e
+    
+    def ip_to_otx_malware_hash(self, ip:str):
+        """Searches OTX DirectConnect for malware hash data for the given ip"""
+        try:
+            otx = connect_to_otx_api(self.otx_api_key)
+            results = otx.get_indicator_details_by_section(IndicatorTypes.IPv4, ip, 'malware')
+            _hash = results.get("data")[0].get("hash", None)
+            if _hash:
+                return [_hash]
+            else:
+                return ["ip clean"]
+        except Exception as e:
+            return e
 
 class EmailAddress(object):
     """Email address handler class"""
@@ -861,10 +892,10 @@ def make_vt_api_request(url: str, api_key: str, search_params: dict):
     except Exception as e:
         return e
 
-def connect_to_otx_api(otx_server: str, api_key: str):
+def connect_to_otx_api(api_key: str):
     """Helper function to connect to alienvault otx directconnect api"""
     try:
-        otx = OTXv2(api_key, server=otx_server)
+        otx = OTXv2(api_key)
         return otx
     except Exception as e:
         return e
