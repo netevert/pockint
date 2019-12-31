@@ -2,8 +2,10 @@
 
 import base64
 import dns.resolver
+import IndicatorTypes
 import json
 import os
+from OTXv2 import OTXv2
 import re
 import requests
 import socket as sock
@@ -48,7 +50,7 @@ class Database(object):
         try:
             cursor.execute('''CREATE TABLE api_keys(id INTEGER PRIMARY KEY, api_name TEXT,
                         api_key TEXT, status INTEGER)''')
-            init_data = [("virustotal", "", 0), ("shodan", "", 0)]
+            init_data = [("virustotal", "", 0), ("shodan", "", 0), ("OTX DirectConnect API", "", 0)]
             cursor.executemany(''' INSERT INTO api_keys(api_name, api_key, status) VALUES(?,?,?)''', init_data)
             db.commit()
             cursor.execute('''CREATE TABLE json_data (id INTEGER PRIMARY KEY, 
@@ -318,7 +320,7 @@ class Url(object):
 
 
 class IPAdress(object):
-    """Ip address handler class"""
+    """Ipv4 address handler class"""
     def __init__(self):
         self.osint_options = {
             "dns: reverse lookup": self.reverse_lookup,
@@ -850,12 +852,20 @@ def load_icon():
     return tempFile
 
 def make_vt_api_request(url: str, api_key: str, search_params: dict):
-    """Helper function to interrogate virustotal public api"""
+    """Helper function to query virustotal public api"""
     try:
         params = {"apikey": api_key}
         params.update(search_params)
         headers = {'User-Agent': 'Pockint v.1.0.0'}
         return requests.get(url, params=params, headers=headers)
+    except Exception as e:
+        return e
+
+def connect_to_otx_api(otx_server: str, api_key: str):
+    """Helper function to connect to alienvault otx directconnect api"""
+    try:
+        otx = OTXv2(api_key, server=otx_server)
+        return otx
     except Exception as e:
         return e
 

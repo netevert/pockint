@@ -53,7 +53,7 @@ The latest version is capable of running the following data mining tasks:
 
 </p>
 </details>
-<details><summary>IP Adresses</summary>
+<details><summary>IPv4 Adresses</summary>
 <p>
 
 |Source     |Transform             |API key needed?   |
