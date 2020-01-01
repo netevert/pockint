@@ -349,9 +349,11 @@ class IPAdress(object):
         self.otx_api_key = self.api_db.get_api_key("otx")
         if self.otx_api_key:
             self.osint_options.update({
+                "otx: geolocate": self.ip_to_otx_geolocation_data,
                 "otx: passive dns": self.ip_to_otx_passive_dns,
                 "otx: malware type": self.ip_to_otx_malware_types,
-                "otx: malware hash": self.ip_to_otx_malware_hash
+                "otx: malware hash": self.ip_to_otx_malware_hash,
+                "otx: observed urls": self.ip_to_otx_observed_urls
             })
 
     def is_ip_address(self, _input: str):
@@ -551,6 +553,33 @@ class IPAdress(object):
                 return list(hostnames)
             else:
                 return ["no pdns data"]
+        except Exception as e:
+            return e
+
+    def ip_to_otx_observed_urls(self, ip:str):
+        """Searches OTX DirectConnect for url data associated to the given ip"""
+        try:
+            otx = connect_to_otx_api(self.otx_api_key)
+            results = otx.get_indicator_details_by_section(IndicatorTypes.IPv4, ip, 'url_list')
+            urls = {result["url"]for result in results["url_list"]}
+            if urls:
+                return list(urls)
+            else:
+                return ["no url data"]
+        except Exception as e:
+            return e
+
+    def ip_to_otx_geolocation_data(self, ip:str):
+        """Searches OTX DirectConnect for geolocation data associated to the given ip"""
+        try:
+            otx = connect_to_otx_api(self.otx_api_key)
+            results = otx.get_indicator_details_by_section(IndicatorTypes.IPv4, ip, 'geo')
+            return [ "asn: {}".format(results.get("asn", "no data")),
+                     "city: {}".format(results.get("city", "no data")),
+                     "country: {}".format(results.get("country_code", "no data")),
+                     "coordinates: {},{}".format(results.get("latitude", "no data"), 
+                                                 results.get("longitude", "no data"))
+            ]
         except Exception as e:
             return e
 
