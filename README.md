@@ -58,8 +58,10 @@ The latest version is capable of running the following data mining tasks:
 
 </p>
 </details>
-<details><summary>IPv4 Adresses</summary>
+<details><summary>IP Adresses</summary>
 <p>
+
+**Note:** Only IPv4 Addresses are supported
 
 |Source                                     |Transform             |API key needed?   |
 | ----------------------------------------- | -------------------- | ---------------- |
@@ -94,9 +96,11 @@ The latest version is capable of running the following data mining tasks:
 
 </p>
 </details>
-<details><summary>MD5 and SHA256 Hashes</summary>
+<details><summary>Hashes</summary>
 <p>
  
+**Note:** Both MD5 and SHA256 hashes are supported
+
 |Source                                      |Transform             |API key needed?   |
 | ------------------------------------------ | -------------------- | ---------------- |
 |  [Virustotal](https://www.virustotal.com)  | Malicious check      |:heavy_check_mark:|
