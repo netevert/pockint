@@ -70,6 +70,7 @@ The latest version is capable of running the following data mining tasks:
 | [Virustotal](https://www.virustotal.com)  | Communicating samples|:heavy_check_mark:|
 | [Virustotal](https://www.virustotal.com)  | Downloaded samples   |:heavy_check_mark:|
 | [Virustotal](https://www.virustotal.com)  | Detected URLs        |:heavy_check_mark:|
+| [OTX](https://otx.alienvault.com/)        | Passive DNS          |:heavy_check_mark:|
 | [OTX](https://otx.alienvault.com/)        | Malware type         |:heavy_check_mark:|
 | [OTX](https://otx.alienvault.com/)        | Malware hash         |:heavy_check_mark:|
 

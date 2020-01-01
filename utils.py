@@ -349,6 +349,7 @@ class IPAdress(object):
         self.otx_api_key = self.api_db.get_api_key("otx")
         if self.otx_api_key:
             self.osint_options.update({
+                "otx: passive dns": self.ip_to_otx_passive_dns,
                 "otx: malware type": self.ip_to_otx_malware_types,
                 "otx: malware hash": self.ip_to_otx_malware_hash
             })
@@ -537,6 +538,19 @@ class IPAdress(object):
                 return [_hash]
             else:
                 return ["ip clean"]
+        except Exception as e:
+            return e
+
+    def ip_to_otx_passive_dns(self, ip:str):
+        """Searches OTX DirectConnect for passive dns data for the given ip"""
+        try:
+            otx = connect_to_otx_api(self.otx_api_key)
+            results = otx.get_indicator_details_by_section(IndicatorTypes.IPv4, ip, 'passive_dns')
+            hostnames = {result["hostname"]for result in results["passive_dns"]}
+            if hostnames:
+                return list(hostnames)
+            else:
+                return ["no pdns data"]
         except Exception as e:
             return e
 
