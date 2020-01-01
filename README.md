@@ -27,7 +27,7 @@ Why use it? POCKINT is designed to be **simple, portable and powerful**.
 
 The latest version is capable of running the following data mining tasks:
 
-<details><summary>Domains</summary>
+<details><summary>Hostnames</summary>
 <p>
 
 |Source                                     |Transform               |API key needed?   |
@@ -50,6 +50,11 @@ The latest version is capable of running the following data mining tasks:
 | [Virustotal](https://www.virustotal.com)  | Downloaded samples     |:heavy_check_mark:|
 | [Virustotal](https://www.virustotal.com)  | Detected URLs          |:heavy_check_mark:|
 | [Virustotal](https://www.virustotal.com)  | Subdomains             |:heavy_check_mark:|
+| [OTX](https://otx.alienvault.com/)        | Passive DNS            |:heavy_check_mark:|
+| [OTX](https://otx.alienvault.com/)        | Malware type           |:heavy_check_mark:|
+| [OTX](https://otx.alienvault.com/)        | Malware hash           |:heavy_check_mark:|
+| [OTX](https://otx.alienvault.com/)        | Observed urls          |:heavy_check_mark:|
+| [OTX](https://otx.alienvault.com/)        | Geolocate              |:heavy_check_mark:|
 
 </p>
 </details>

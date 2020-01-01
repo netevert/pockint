@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import base64
+import datetime
 import dns.resolver
 import IndicatorTypes
 import json
@@ -522,9 +523,15 @@ class IPAdress(object):
         try:
             otx = connect_to_otx_api(self.otx_api_key)
             results = otx.get_indicator_details_by_section(IndicatorTypes.IPv4, ip, 'malware')
-            detections = results.get("data")[0].get("detections", None)
-            if detections:
-                return ["[{}] {}".format(key, detections[key]) for key in detections if detections[key] != None]
+            if results.get("data", None):
+                malware_types = set()
+                for result in results.get("data"):
+                    detections = result.get("detections")
+                    for detection in detections:
+                        if detections[detection]:
+                            date = datetime.datetime.fromtimestamp(result.get("datetime_int")).strftime('%Y-%m-%d')
+                            malware_types.add("[{} on {}] {}".format(detection, date, detections[detection]))
+                return malware_types
             else:
                 return ["ip clean"]
         except Exception as e:
@@ -535,9 +542,9 @@ class IPAdress(object):
         try:
             otx = connect_to_otx_api(self.otx_api_key)
             results = otx.get_indicator_details_by_section(IndicatorTypes.IPv4, ip, 'malware')
-            _hash = results.get("data")[0].get("hash", None)
-            if _hash:
-                return [_hash]
+            data = results.get("data", None)
+            if data:
+                return list({detection.get("hash") for detection in data})
             else:
                 return ["ip clean"]
         except Exception as e:
@@ -635,6 +642,15 @@ class Domain(object):
                 "virustotal: downloaded samples": self.domain_to_vt_downloaded_samples,
                 "virustotal: detected urls": self.domain_to_vt_detected_urls,
                 "virustotal: subdomains": self.domain_to_vt_subdomains
+            })
+        self.otx_api_key = self.api_db.get_api_key("otx")
+        if self.otx_api_key:
+            self.osint_options.update({
+                "otx: geolocate": self.domain_to_otx_geolocation_data,
+                "otx: passive dns": self.domain_to_otx_passive_dns,
+                "otx: malware type": self.domain_to_otx_malware_types,
+                "otx: malware hash": self.domain_to_otx_malware_hash,
+                "otx: observed urls": self.domain_to_otx_observed_urls
             })
 
     def is_valid_domain(self, _input: str):
@@ -851,6 +867,79 @@ class Domain(object):
         except Exception as e:
             return e
 
+    def domain_to_otx_malware_types(self, domain:str):
+        """Searches OTX DirectConnect for malware type data for the given domain"""
+        try:
+            otx = connect_to_otx_api(self.otx_api_key)
+            results = otx.get_indicator_details_by_section(IndicatorTypes.HOSTNAME, domain, 'malware')
+            if results.get("data", None):
+                malware_types = set()
+                for result in results.get("data"):
+                    detections = result.get("detections")
+                    for detection in detections:
+                        if detections[detection]:
+                            date = datetime.datetime.fromtimestamp(result.get("datetime_int")).strftime('%Y-%m-%d')
+                            malware_types.add("[{} on {}] {}".format(detection, date, detections[detection]))
+                return malware_types
+            else:
+                return ["hostname clean"]
+        except Exception as e:
+            return e
+    
+    def domain_to_otx_malware_hash(self, domain:str):
+        """Searches OTX DirectConnect for malware hash data for the given domain"""
+        try:
+            otx = connect_to_otx_api(self.otx_api_key)
+            results = otx.get_indicator_details_by_section(IndicatorTypes.HOSTNAME, domain, 'malware')
+            data = results.get("data", None)
+            if data:
+                return list({detection.get("hash") for detection in data})
+            else:
+                return ["hostname clean"]
+        except Exception as e:
+            return e
+
+    def domain_to_otx_passive_dns(self, domain:str):
+        """Searches OTX DirectConnect for passive dns data for the given domain"""
+        try:
+            otx = connect_to_otx_api(self.otx_api_key)
+            results = otx.get_indicator_details_by_section(IndicatorTypes.HOSTNAME, domain, 'passive_dns')
+            hostnames = {result["hostname"]for result in results["passive_dns"]}
+            if hostnames:
+                return list(hostnames)
+            else:
+                return ["no pdns data"]
+        except Exception as e:
+            return e
+
+    def domain_to_otx_observed_urls(self, domain:str):
+        """Searches OTX DirectConnect for url data associated to the given domain"""
+        try:
+            otx = connect_to_otx_api(self.otx_api_key)
+            results = otx.get_indicator_details_by_section(IndicatorTypes.HOSTNAME, domain, 'url_list')
+            urls = {result["url"]for result in results["url_list"]}
+            if urls:
+                return list(urls)
+            else:
+                return ["no url data"]
+        except Exception as e:
+            return e
+
+    def domain_to_otx_geolocation_data(self, domain:str):
+        """Searches OTX DirectConnect for geolocation data associated to the given domain"""
+        try:
+            otx = connect_to_otx_api(self.otx_api_key)
+            results = otx.get_indicator_details_by_section(IndicatorTypes.HOSTNAME, domain, 'geo')
+            return [ "asn: {}".format(results.get("asn", "no data")),
+                     "city: {}".format(results.get("city", "no data")),
+                     "country: {}".format(results.get("country_code", "no data")),
+                     "coordinates: {},{}".format(results.get("latitude", "no data"), 
+                                                 results.get("longitude", "no data"))
+            ]
+        except Exception as e:
+            return e
+
+
 
 class InputValidator(object):
     """Handler to validate user inputs"""
@@ -888,7 +977,7 @@ class InputValidator(object):
             elif self.email.is_valid_email(i) and self.consistency_check(_list, "email"):
                 output.append([True, "input: email address", [option for option in self.email.osint_options.keys()]])
             elif self.domain.is_valid_domain(i) and self.consistency_check(_list, "domain"):
-                output.append([True, "input: domain", [option for option in self.domain.osint_options.keys()]])
+                output.append([True, "input: hostname", [option for option in self.domain.osint_options.keys()]])
             elif self.url.is_url(i) and self.consistency_check(_list, "url"):
                 output.append([True, "input: url", [option for option in self.url.osint_options.keys()]])
             elif self.md5.is_md5(i) and self.consistency_check(_list, "hash"):
