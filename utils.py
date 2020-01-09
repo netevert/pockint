@@ -268,6 +268,14 @@ class Url(object):
             self.osint_options.update({
                 "virustotal: malicious check": self.is_malicious,
                 "virustotal: reported detections": self.reported_detections})
+        self.otx_api_key = self.api_db.get_api_key("otx")
+        if self.otx_api_key:
+            self.osint_options.update({
+                "otx: geolocate" : self.url_to_otx_geolocation_data,
+                "otx: http response analysis" : self.url_to_otx_http_response_analysis,
+                "otx: parse url": self.url_to_otx_hostname_parsing,
+                "otx: malicious check": self.url_is_malicious
+            })
 
     def is_url(self, _input: str):
         """Validates if _input is a url"""
@@ -319,6 +327,95 @@ class Url(object):
         except Exception as e:
             return e
 
+    def url_to_otx_http_response_analysis(self, url:str):
+        """Returns otx alienvault analysis of url http response data"""
+        try:    
+            otx = connect_to_otx_api(self.otx_api_key)
+            results = otx.get_indicator_details_by_section(IndicatorTypes.URL, url, 'url_list')
+            data = [result.get("result", None).get("urlworker", None).get("http_response", None) for result in results.get("url_list", None)]
+            out = set()
+
+            for row in data:
+                for key in row:
+                    out.add("{}: {}".format(key.lower(), row[key]))
+
+            return out
+
+        except Exception as e:
+            return e
+
+    def url_to_otx_geolocation_data(self, url:str):
+        """Returns otx alienvault geolocation analysis for given url"""
+        try:
+            otx = connect_to_otx_api(self.otx_api_key)
+            results = otx.get_indicator_details_by_section(IndicatorTypes.URL, url, 'url_list')
+
+            return ["continent: {}".format(results.get("continent_code", "no data")),
+                    "country: {}".format(results.get("country_code", "no data")),
+                    "city: {}".format(results.get("city", "no data")),
+                    "country: {}".format(results.get("country_code", "no data")),
+                    "postal code: {}".format(results.get("postal_code", "no data")),
+                    "coordinates: {},{}".format(results.get("latitude", "no data"), 
+                                                 results.get("longitude", "no data"))]
+
+        except Exception as e:
+            return e
+
+    def url_to_otx_hostname_parsing(self, url:str):
+        """Returns otx alienvault url hostname parsing for given url"""
+        try:
+            otx = connect_to_otx_api(self.otx_api_key)
+            results = otx.get_indicator_details_by_section(IndicatorTypes.URL, url, 'url_list')
+
+            return [results.get("domain", "no domain data"), results.get("hostname", "no hostname data")]
+
+        except Exception as e:
+            return e
+
+    def url_is_malicious(self, url:str):
+        """Checks if otx alienvault reports url as malicious"""
+        otx = connect_to_otx_api(self.otx_api_key)
+        alerts = self.extract_url_alert_data(otx, url)
+        if len(alerts) > 0:
+            return ['Identified as potentially malicious']
+        else:
+            return ['Unknown or not identified as malicious']
+
+    def extract_url_alert_data(self, otx, url:str):
+        """Helper function to extracts full data for url indicators, borrowed from 
+        https://github.com/AlienVault-OTX/OTX-Python-SDK/tree/master/examples/is_malicious"""
+        try:
+            alerts = []
+            result = otx.get_indicator_details_full(IndicatorTypes.URL, url)
+
+            google = getValue( result, ['url_list', 'url_list', 'result', 'safebrowsing'])
+            if google and 'response_code' in str(google):
+                alerts.append({'google_safebrowsing': 'malicious'})
+
+
+            clamav = getValue( result, ['url_list', 'url_list', 'result', 'multiav','matches','clamav'])
+            if clamav:
+                    alerts.append({'clamav': clamav})
+
+            avast = getValue( result, ['url_list', 'url_list', 'result', 'multiav','matches','avast'])
+            if avast:
+                alerts.append({'avast': avast})
+
+            # Get the file analysis too, if it exists
+            has_analysis = getValue( result,  ['url_list','url_list', 'result', 'urlworker', 'has_file_analysis'])
+            if has_analysis:
+                hash = getValue( result,  ['url_list','url_list', 'result', 'urlworker', 'sha256'])
+                file_alerts = file(otx, hash)
+                if file_alerts:
+                    for alert in file_alerts:
+                        alerts.append(alert)
+
+            # Todo: Check file page
+
+            return alerts
+        
+        except Exception as e:
+            return e
 
 class IPAdress(object):
     """Ipv4 address handler class"""
@@ -354,7 +451,8 @@ class IPAdress(object):
                 "otx: passive dns": self.ip_to_otx_passive_dns,
                 "otx: malware type": self.ip_to_otx_malware_types,
                 "otx: malware hash": self.ip_to_otx_malware_hash,
-                "otx: observed urls": self.ip_to_otx_observed_urls
+                "otx: observed urls": self.ip_to_otx_observed_urls,
+                "otx malicious check": self.ip_is_malicious
             })
 
     def is_ip_address(self, _input: str):
@@ -590,6 +688,39 @@ class IPAdress(object):
         except Exception as e:
             return e
 
+    def extract_ip_alert_data(self, otx, ip:str):
+        """Helper function to extracts full data for ip indicators, borrowed from 
+        https://github.com/AlienVault-OTX/OTX-Python-SDK/tree/master/examples/is_malicious"""
+        try:
+            alerts = []
+            result = otx.get_indicator_details_by_section(IndicatorTypes.IPv4, ip, 'general')
+
+            # Return nothing if it's in the whitelist
+            validation = getValue(result, ['validation'])
+            if not validation:
+                pulses = getValue(result, ['pulse_info', 'pulses'])
+                if pulses:
+                    for pulse in pulses:
+                        if 'name' in pulse:
+                            alerts.append('In pulse: ' + pulse['name'])
+
+            return alerts        
+        except Exception as e:
+            return e
+
+    def ip_is_malicious(self, ip:str):
+        try:
+            otx = connect_to_otx_api(self.otx_api_key)
+            alerts = self.extract_ip_alert_data(otx, ip)
+            if len(alerts) > 0:
+                return ['Identified as potentially malicious']
+                
+            else:
+                return ['Unknown or not identified as malicious']
+
+        except Exception as e:
+            return e
+
 class EmailAddress(object):
     """Email address handler class"""
     def __init__(self):
@@ -650,7 +781,8 @@ class Domain(object):
                 "otx: passive dns": self.domain_to_otx_passive_dns,
                 "otx: malware type": self.domain_to_otx_malware_types,
                 "otx: malware hash": self.domain_to_otx_malware_hash,
-                "otx: observed urls": self.domain_to_otx_observed_urls
+                "otx: observed urls": self.domain_to_otx_observed_urls,
+                "otx: malicious check": self.domain_is_malicious
             })
 
     def is_valid_domain(self, _input: str):
@@ -939,7 +1071,50 @@ class Domain(object):
         except Exception as e:
             return e
 
+    def extract_domain_alert_data(self, otx, domain:str):
+        """Helper function to extracts full data for domain indicators, borrowed from 
+        https://github.com/AlienVault-OTX/OTX-Python-SDK/tree/master/examples/is_malicious"""
+        try:
+            alerts = []
+            result = otx.get_indicator_details_by_section(IndicatorTypes.HOSTNAME, domain, 'general')
 
+            # Return nothing if it's in the whitelist
+            validation = getValue(result, ['validation'])
+            if not validation:
+                pulses = getValue(result, ['pulse_info', 'pulses'])
+                if pulses:
+                    for pulse in pulses:
+                        if 'name' in pulse:
+                            alerts.append('In pulse: ' + pulse['name'])
+
+            result = otx.get_indicator_details_by_section(IndicatorTypes.DOMAIN, domain, 'general')
+            # Return nothing if it's in the whitelist
+            validation = getValue(result, ['validation'])
+            if not validation:
+                pulses = getValue(result, ['pulse_info', 'pulses'])
+                if pulses:
+                    for pulse in pulses:
+                        if 'name' in pulse:
+                            alerts.append('In pulse: ' + pulse['name'])
+
+
+            return alerts
+
+        except Exception as e:
+            return e
+
+    def domain_is_malicious(self, domain:str):
+        """Checks if otx alienvault reports domain as malicious"""
+        try:
+            otx = connect_to_otx_api(self.otx_api_key)
+            alerts = self.extract_domain_alert_data(otx, domain)
+            if len(alerts) > 0:
+                return ['Identified as potentially malicious']
+            else:
+                return ['Unknown or not identified as malicious']
+        
+        except Exception as e:
+            return e
 
 class InputValidator(object):
     """Handler to validate user inputs"""
@@ -1034,6 +1209,73 @@ def connect_to_otx_api(api_key: str):
 
 def callback(url):
     webbrowser.open_new(url)
+
+def getValue(results, keys):
+    """Borrowed from https://github.com/AlienVault-OTX/OTX-Python-SDK/tree/master/examples/is_malicious"""
+    try:
+        if type(keys) is list and len(keys) > 0:
+
+            if type(results) is dict:
+                key = keys.pop(0)
+                if key in results:
+                    return getValue(results[key], keys)
+                else:
+                    return None
+            else:
+                if type(results) is list and len(results) > 0:
+                    return getValue(results[0], keys)
+                else:
+                    return results
+        else:
+            return results
+    except Exception as e:
+        return e
+
+def file(otx, hash):
+    """Borrowed from https://github.com/AlienVault-OTX/OTX-Python-SDK/tree/master/examples/is_malicious"""
+    try:
+        alerts = []
+
+        hash_type = IndicatorTypes.FILE_HASH_MD5
+        if len(hash) == 64:
+            hash_type = IndicatorTypes.FILE_HASH_SHA256
+        if len(hash) == 40:
+            hash_type = IndicatorTypes.FILE_HASH_SHA1
+
+        result = otx.get_indicator_details_full(hash_type, hash)
+
+        avg = getValue( result, ['analysis','analysis','plugins','avg','results','detection'])
+        if avg:
+            alerts.append({'avg': avg})
+
+        clamav = getValue( result, ['analysis','analysis','plugins','clamav','results','detection'])
+        if clamav:
+            alerts.append({'clamav': clamav})
+
+        avast = getValue( result, ['analysis','analysis','plugins','avast','results','detection'])
+        if avast:
+            alerts.append({'avast': avast})
+
+        microsoft = getValue( result, ['analysis','analysis','plugins','cuckoo','result','virustotal','scans','Microsoft','result'])
+        if microsoft:
+            alerts.append({'microsoft': microsoft})
+
+        symantec = getValue( result, ['analysis','analysis','plugins','cuckoo','result','virustotal','scans','Symantec','result'])
+        if symantec:
+            alerts.append({'symantec': symantec})
+
+        kaspersky = getValue( result, ['analysis','analysis','plugins','cuckoo','result','virustotal','scans','Kaspersky','result'])
+        if kaspersky:
+            alerts.append({'kaspersky': kaspersky})
+
+        suricata = getValue( result, ['analysis','analysis','plugins','cuckoo','result','suricata','rules','name'])
+        if suricata and 'trojan' in str(suricata).lower():
+            alerts.append({'suricata': suricata})
+
+        return alerts
+
+    except Exception as e:
+        return e
 
 icon = \
 """
