@@ -1,7 +1,7 @@
 ![Icon](https://github.com/netevert/pockint/blob/master/docs/icon.png)
 =======
 [![made with python](https://img.shields.io/badge/-made%20with%20python-blue.svg?logo=python&style=flat-square&logoColor=white)](https://www.python.org)
-![Supported platforms](https://img.shields.io/badge/platform-Windows%20|%20Linux-informational.svg?style=flat-square)
+![Supported platforms](https://img.shields.io/badge/platform-Windows-informational.svg?style=flat-square)
 [![GitHub release](https://img.shields.io/github/release/netevert/pockint.svg?style=flat-square)](https://github.com/netevert/pockint/releases)
 [![GitHub last commit](https://img.shields.io/github/last-commit/netevert/pockint.svg?style=flat-square)](https://github.com/netevert/pockint/commit/master)
 ![GitHub All Releases](https://img.shields.io/github/downloads/netevert/pockint/total.svg?style=flat-square)
