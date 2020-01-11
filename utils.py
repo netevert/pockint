@@ -22,8 +22,10 @@ import whois
 class Database(object):
     """Local sqlite database handler class"""
     def __init__(self):
-        """Initialises application database, if app db doesn't exist, it creates one"""
+        """Initialises or updates application database, if app db doesn't exist, it creates one"""
         
+        self.api_keys = [("virustotal", "", 0), ("shodan", "", 0), ("otx", "", 0)]
+
         # verify that db folder exists, if not create one
         if sys.platform == "win32":
             self.db_path = os.getenv("LOCALAPPDATA")+ "\\pockint\\"
@@ -37,12 +39,24 @@ class Database(object):
         self.db = sqlite3.connect(self.db_path + "\\.pockint.db")
         self.cursor = self.db.cursor()
 
+        # upgrades old database versions
+        self.upgrade_database()
+
+    def upgrade_database(self):
+        """Upgrades tables of existing pockint databases"""
         # create json_data table if not exist (to upgrade old databases)
         self.cursor.execute("""SELECT name FROM sqlite_master WHERE type='table' AND name='json_data';""")
         if not self.cursor.fetchone():
             self.cursor.execute('''CREATE TABLE json_data (id INTEGER PRIMARY KEY, 
             investigation_id TEXT, json TEXT)''')
             self.db.commit()
+
+        # updates database with new api keys added to the system
+        for key in self.api_keys:
+            self.cursor.execute('''SELECT api_key FROM api_keys WHERE api_name=?''', (key[0],))
+            if not self.cursor.fetchone():
+                self.cursor.execute(''' INSERT INTO api_keys(api_name, api_key, status) VALUES(?,?,?)''', key)
+                self.db.commit()
 
     def create_database(self):
         """Creates a new database in AppData/Local"""
@@ -51,8 +65,7 @@ class Database(object):
         try:
             cursor.execute('''CREATE TABLE api_keys(id INTEGER PRIMARY KEY, api_name TEXT,
                         api_key TEXT, status INTEGER)''')
-            init_data = [("virustotal", "", 0), ("shodan", "", 0), ("otx", "", 0)]
-            cursor.executemany(''' INSERT INTO api_keys(api_name, api_key, status) VALUES(?,?,?)''', init_data)
+            cursor.executemany(''' INSERT INTO api_keys(api_name, api_key, status) VALUES(?,?,?)''', self.api_keys)
             db.commit()
             cursor.execute('''CREATE TABLE json_data (id INTEGER PRIMARY KEY, 
             investigation_id TEXT, json TEXT)''')
