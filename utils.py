@@ -161,7 +161,7 @@ class Sha256Hash(object):
         self.otx_api_key = self.api_db.get_api_key("otx")
         if self.otx_api_key:
             self.osint_options.update({
-                "otx: malicious check": self.url_to_otx_is_malicious
+                "otx: malicious check": self.hash_to_otx_is_malicious
             })
     
     def is_sha256(self, _input: str):
@@ -231,7 +231,7 @@ class Md5Hash(object):
         self.otx_api_key = self.api_db.get_api_key("otx")
         if self.otx_api_key:
             self.osint_options.update({
-                "otx: malicious check": self.url_to_otx_is_malicious
+                "otx: malicious check": self.hash_to_otx_is_malicious
             })
 
     def is_md5(self, _input: str):
