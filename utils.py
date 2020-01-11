@@ -158,6 +158,11 @@ class Sha256Hash(object):
             self.osint_options.update({ 
                 "virustotal: malicious check": self.virustotal_is_malicious,
                 "virustotal: malware type": self.virustotal_malware_type})
+        self.otx_api_key = self.api_db.get_api_key("otx")
+        if self.otx_api_key:
+            self.osint_options.update({
+                "otx: malicious check": self.url_to_otx_is_malicious
+            })
     
     def is_sha256(self, _input: str):
         """Validates if _input is an md5 hash"""
@@ -201,6 +206,17 @@ class Sha256Hash(object):
         except Exception as e:
             return e
 
+    def hash_to_otx_is_malicious(self, _hash:str):
+        """Queries otx to establish if hash is malicious"""
+        try:
+            otx = connect_to_otx_api(self.otx_api_key)
+            alerts =  file(otx, _hash)
+            if len(alerts) > 0:
+                return ['Identified as potentially malicious']
+            else:
+                return ['Unknown or not identified as malicious']
+        except Exception as e:
+            return e
 
 class Md5Hash(object):
     """Md5 hash handler class"""
@@ -212,6 +228,11 @@ class Md5Hash(object):
             self.osint_options.update({
                 "virustotal: malicious check": self.virustotal_is_malicious,
                 "virustotal: malware type": self.virustotal_malware_type})
+        self.otx_api_key = self.api_db.get_api_key("otx")
+        if self.otx_api_key:
+            self.osint_options.update({
+                "otx: malicious check": self.url_to_otx_is_malicious
+            })
 
     def is_md5(self, _input: str):
         """Validates if _input is an md5 hash"""
@@ -255,6 +276,17 @@ class Md5Hash(object):
         except Exception as e:
             return e
 
+    def hash_to_otx_is_malicious(self, _hash:str):
+        """Queries otx to establish if hash is malicious"""
+        try:
+            otx = connect_to_otx_api(self.otx_api_key)
+            alerts =  file(otx, _hash)
+            if len(alerts) > 0:
+                return ['Identified as potentially malicious']
+            else:
+                return ['Unknown or not identified as malicious']
+        except Exception as e:
+            return e
 
 class Url(object):
     """Url handler class"""
@@ -274,7 +306,7 @@ class Url(object):
                 "otx: geolocate" : self.url_to_otx_geolocation_data,
                 "otx: http response analysis" : self.url_to_otx_http_response_analysis,
                 "otx: parse url": self.url_to_otx_hostname_parsing,
-                "otx: malicious check": self.url_is_malicious
+                "otx: malicious check": self.url_to_otx_is_malicious
             })
 
     def is_url(self, _input: str):
@@ -372,7 +404,7 @@ class Url(object):
         except Exception as e:
             return e
 
-    def url_is_malicious(self, url:str):
+    def url_to_otx_is_malicious(self, url:str):
         """Checks if otx alienvault reports url as malicious"""
         otx = connect_to_otx_api(self.otx_api_key)
         alerts = self.extract_url_alert_data(otx, url)
@@ -452,7 +484,7 @@ class IPAdress(object):
                 "otx: malware type": self.ip_to_otx_malware_types,
                 "otx: malware hash": self.ip_to_otx_malware_hash,
                 "otx: observed urls": self.ip_to_otx_observed_urls,
-                "otx malicious check": self.ip_is_malicious
+                "otx malicious check": self.ip_to_otx_is_malicious
             })
 
     def is_ip_address(self, _input: str):
@@ -708,7 +740,8 @@ class IPAdress(object):
         except Exception as e:
             return e
 
-    def ip_is_malicious(self, ip:str):
+    def ip_to_otx_is_malicious(self, ip:str):
+        """Queries otx to establish if ip is malicious"""
         try:
             otx = connect_to_otx_api(self.otx_api_key)
             alerts = self.extract_ip_alert_data(otx, ip)
@@ -740,7 +773,6 @@ class EmailAddress(object):
     def domain_extract(self, email: str):
         """Returns domain from supplied email"""
         return [email.split("@")[1]]
-
 
 class Domain(object):
     """Domain handler class"""
@@ -782,7 +814,7 @@ class Domain(object):
                 "otx: malware type": self.domain_to_otx_malware_types,
                 "otx: malware hash": self.domain_to_otx_malware_hash,
                 "otx: observed urls": self.domain_to_otx_observed_urls,
-                "otx: malicious check": self.domain_is_malicious
+                "otx: malicious check": self.domain_to_otx_is_malicious
             })
 
     def is_valid_domain(self, _input: str):
@@ -1103,7 +1135,7 @@ class Domain(object):
         except Exception as e:
             return e
 
-    def domain_is_malicious(self, domain:str):
+    def domain_to_otx_is_malicious(self, domain:str):
         """Checks if otx alienvault reports domain as malicious"""
         try:
             otx = connect_to_otx_api(self.otx_api_key)

@@ -107,10 +107,11 @@ The latest version is capable of running the following data mining tasks:
  
 **Note:** Both MD5 and SHA256 hashes are supported
 
-|Source                                      |Transform             |API key needed?   |
-| ------------------------------------------ | -------------------- | ---------------- |
-|  [Virustotal](https://www.virustotal.com)  | Malicious check      |:heavy_check_mark:|
-|  [Virustotal](https://www.virustotal.com)  | Malware type         |:heavy_check_mark:|
+|Source                                     |Transform             |API key needed?   |
+| ----------------------------------------- | -------------------- | ---------------- |
+| [Virustotal](https://www.virustotal.com)  | Malicious check      |:heavy_check_mark:|
+| [Virustotal](https://www.virustotal.com)  | Malware type         |:heavy_check_mark:|
+| [OTX](https://otx.alienvault.com/)        | Malicious check      |:heavy_check_mark:|
 
 </p>
 </details>
