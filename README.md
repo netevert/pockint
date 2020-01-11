@@ -13,7 +13,7 @@ POCKINT (a.k.a. Pocket Intelligence) is the OSINT swiss army knife for DFIR/OSIN
 
 ## Installation
 
-You can grab the latest version from the [releases page](https://github.com/netevert/pockint/releases/latest). POCKINT is provided as a single executable that can be stored and run anywhere on computers. POCKINT is available for Windows and Linux platforms.
+You can grab the latest version from the [releases page](https://github.com/netevert/pockint/releases/latest). POCKINT is provided as a single executable that can be stored and run anywhere on computers. POCKINT is available for Windows only.
 
 ## Features
 
