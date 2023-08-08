@@ -1,4 +1,4 @@
-﻿astroid==2.3.3
+astroid==2.3.3
 certifi==2019.11.28
 chardet==3.0.4
 Click==7.0
@@ -16,7 +16,7 @@ pylint==2.4.4
 python-dateutil==2.8.1
 python-whois==0.7.2
 pytz==2019.3
-requests==2.22.0
+requests==2.31.0
 shodan==1.20.0
 six==1.13.0
 urllib3==1.26.5
