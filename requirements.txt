@@ -1,5 +1,5 @@
-﻿astroid==2.3.3
-certifi==2019.11.28
+astroid==2.3.3
+certifi==2023.7.22
 chardet==3.0.4
 Click==7.0
 click-plugins==1.1.1
