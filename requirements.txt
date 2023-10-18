@@ -19,7 +19,7 @@ pytz==2019.3
 requests==2.22.0
 shodan==1.20.0
 six==1.13.0
-urllib3==1.26.5
+urllib3==1.26.18
 validators==0.14.0
 wrapt==1.11.2
 XlsxWriter==1.2.6
